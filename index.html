@@ -869,9 +869,27 @@ async function doLogin(){
   err.className='auth-error';
   if(!email||!password){err.textContent='Please enter your email and password.';err.className='auth-error show';return;}
   btn.className='auth-btn loading';btn.textContent='Signing in...';
-  const{error}=await supa.auth.signInWithPassword({email,password});
+  const{data,error}=await supa.auth.signInWithPassword({email,password});
   btn.className='auth-btn';btn.textContent='Sign in';
   if(error){err.textContent=error.message;err.className='auth-error show';return;}
+  if(data&&data.user){
+    currentUser=data.user;
+    await loadAll();
+    if(state.catalogue.length===0){
+      state.catalogue=JSON.parse(JSON.stringify(DEFAULT_CAT));
+      saveState().catch(()=>{});
+    }
+    buildTimes();
+    updateTrigger();
+    document.getElementById('sf').className='seg'+(state.schedMode==='free'?' on':'');
+    document.getElementById('sw').className='seg'+(state.schedMode==='work'?' on':'');
+    buildCostsForm();
+    updateOverviewCard();
+    renderUserPill();
+    hideAllViews();hideAllNavs();
+    document.getElementById('v-welcome').classList.add('on');
+    setStatusbar(true);
+  }
 }
 
 async function doSignup(){
