@@ -403,9 +403,9 @@ body{font-family:var(--sans);display:flex;flex-direction:column;}
 .loading-label{font-size:13px;color:var(--ink3);}
 
 /* ── AUTH SCREENS ── */
-.auth-screen{display:none;flex-direction:column;align-items:stretch;justify-content:flex-end;background:var(--ink);min-height:100%;padding:0;}
+.auth-screen{display:none;flex-direction:column;align-items:stretch;background:var(--ink);height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .auth-screen.on{display:flex;}
-.auth-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px 32px;}
+.auth-hero{flex:1;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px 24px;}
 .auth-logo{width:64px;height:64px;border-radius:20px;background:var(--g);display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
 .auth-title{font-family:var(--serif);font-size:28px;font-weight:600;color:#fff;text-align:center;margin-bottom:8px;}
 .auth-sub{font-size:14px;color:rgba(255,255,255,0.55);text-align:center;line-height:1.6;}
