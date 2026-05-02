@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The Dope Zone">
+<meta name="theme-color" content="#1C1C18">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>The Dope Zone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --s:#F5EFE4;--s2:#EDE4D6;--s3:#D9CEC0;--s4:#C8BAA8;
+  --g:#7D9B76;--g2:#5C7A55;--g3:#A8C1A2;--g4:#EAF0E9;
+  --ink:#1C1C18;--ink2:#4A4840;--ink3:#8A8578;
+  --cream:#FDFAF5;
+  --red:#C0392B;--red-l:#F5C6C2;--red-ll:#FDF0EF;
+  --amber:#BA7517;--amber-l:#FAC775;--amber-ll:#FAEEDA;
+  --serif:'Lora',Georgia,serif;--sans:'Outfit',sans-serif;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--ink);}
+body{font-family:var(--sans);display:flex;flex-direction:column;}
+
+/* ── APP SHELL ── */
+#app{
+  display:flex;flex-direction:column;
+  width:100%;max-width:480px;margin:0 auto;
+  height:100%;background:var(--s);
+  position:relative;overflow:hidden;
+}
+.statusbar{
+  height:calc(44px + var(--safe-top));
+  padding-top:var(--safe-top);
+  display:flex;align-items:flex-end;justify-content:space-between;
+  padding-left:20px;padding-right:20px;padding-bottom:8px;
+  flex-shrink:0;z-index:10;transition:background .3s;
+}
+.statusbar.dark{background:var(--ink);}
+.statusbar.light{background:var(--s);}
+.st{font-size:15px;font-weight:500;}
+.st.dark{color:rgba(255,255,255,0.85);}
+.st.light{color:var(--ink);}
+.si{display:flex;gap:5px;align-items:center;}
+
+/* ── VIEWS ── */
+.view{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.view.on{display:flex;}
+.scroll{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.scroll::-webkit-scrollbar{display:none;}
+.pad{padding:0 20px 32px;}
+
+/* ── BOTTOM NAV ── */
+.bnav{
+  display:none;flex-direction:row;
+  background:var(--cream);border-top:0.5px solid var(--s3);
+  padding:8px 2px calc(12px + var(--safe-bottom)) 2px;
+  flex-shrink:0;
+}
+.bnav.visible{display:flex;}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;background:none;border:none;-webkit-appearance:none;}
+.bn-lbl{font-size:9px;color:var(--ink3);font-family:var(--sans);letter-spacing:0.02em;white-space:nowrap;}
+.bn.on .bn-lbl{color:var(--g2);font-weight:500;}
+
+/* ── SHARED ── */
+.hdr{padding:4px 20px 0;background:var(--s);flex-shrink:0;}
+.hdr-row{display:flex;align-items:center;gap:10px;padding:12px 0 4px;}
+.hbk{width:36px;height:36px;border-radius:50%;border:0.5px solid var(--s3);background:var(--cream);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.hbtn{width:36px;height:36px;border-radius:50%;border:0.5px solid var(--s3);background:var(--cream);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.htitle{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--ink);}
+.hsub{font-size:12px;color:var(--ink3);letter-spacing:0.07em;text-transform:uppercase;padding-bottom:14px;}
+.divider{height:1px;background:var(--s3);margin:20px 0;}
+.prim-btn{width:100%;background:var(--g);color:#fff;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:500;font-family:var(--sans);cursor:pointer;margin-top:8px;}
+.sec-note{text-align:center;font-size:12px;color:var(--ink3);margin-top:10px;}
+.page-dots{display:flex;justify-content:center;gap:7px;padding:14px 0 0;}
+.page-dots.dark{background:var(--ink);}
+.pdot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.25);transition:all .2s;}
+.pdot.on{background:var(--g3);width:20px;border-radius:20px;}
+.save-dot{width:7px;height:7px;border-radius:50%;background:var(--s3);display:inline-block;margin-left:6px;transition:background .3s;flex-shrink:0;}
+.save-dot.saving{background:var(--amber);}
+.save-dot.saved{background:var(--g);}
+
+/* ── INTRO ── */
+.intro-hero{background:var(--ink);padding:28px 24px 0;flex-shrink:0;}
+.intro-p{font-size:14px;color:var(--ink2);line-height:1.78;margin-bottom:16px;}
+.pull-quote{background:var(--ink);border-radius:14px;padding:20px;margin:22px 0;}
+.pq{font-family:var(--serif);font-size:16px;color:#fff;line-height:1.65;font-style:italic;}
+.pq em{color:var(--g3);font-style:normal;}
+.sec-lbl{font-size:11px;color:var(--ink3);letter-spacing:0.09em;text-transform:uppercase;font-weight:500;margin:0 0 12px;}
+.tool-card{background:var(--cream);border:0.5px solid var(--s3);border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.tool-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.tool-name{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px;}
+.tool-desc{font-size:13px;color:var(--ink3);line-height:1.55;}
+.dz-scale-wrap{background:var(--cream);border:0.5px solid var(--s3);border-radius:12px;padding:16px;margin:16px 0;}
+.dz-scale-lbl{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.09em;font-weight:500;margin-bottom:12px;}
+.dz-track{display:flex;gap:3px;}
+.dz-pip{flex:1;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;font-family:var(--serif);}
+.dz-axis{display:flex;justify-content:space-between;margin-top:6px;}
+.dz-ax{font-size:10px;color:var(--ink3);}
+.dz-ax-mid{font-size:10px;color:var(--g2);font-weight:500;}
+
+/* ── BIO ── */
+.bio-p{font-size:14px;color:var(--ink2);line-height:1.78;margin-bottom:16px;}
+.bio-callout{background:var(--g4);border-left:3px solid var(--g);padding:14px 16px;margin:18px 0;}
+.bio-callout-text{font-family:var(--serif);font-size:15px;color:var(--g2);line-height:1.65;font-style:italic;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0;}
+.stat-card{background:var(--cream);border:0.5px solid var(--s3);border-radius:12px;padding:14px;}
+.stat-num{font-family:var(--serif);font-size:28px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.stat-unit{font-size:14px;font-weight:400;color:var(--ink3);}
+.stat-lbl{font-size:12px;color:var(--ink3);line-height:1.45;}
+.mission-card{background:var(--ink);border-radius:14px;padding:20px;margin:18px 0;}
+.mission-label{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:8px;}
+.mission-text{font-family:var(--serif);font-size:16px;color:#fff;line-height:1.65;font-style:italic;}
+.mission-text em{color:var(--g3);font-style:normal;}
+
+/* ── MODULE CARDS ── */
+.mod-card{background:var(--cream);border:0.5px solid var(--s3);border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:14px;}
+.mod-card.locked{opacity:0.45;cursor:default;pointer-events:none;}
+.mod-num{width:38px;height:38px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink3);flex-shrink:0;}
+.mod-num.active{background:var(--g);color:#fff;}
+.mod-info{flex:1;}
+.mod-name{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:2px;}
+.mod-desc{font-size:12px;color:var(--ink3);line-height:1.5;}
+.mod-badge{flex-shrink:0;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;}
+.mod-badge.active{background:var(--g4);color:var(--g2);}
+.mod-badge.soon{background:var(--s2);color:var(--ink3);}
+
+/* ── SCHEDULE ── */
+.seg-row{display:flex;background:var(--s2);border-radius:10px;padding:3px;margin-bottom:12px;}
+.seg{flex:1;padding:8px 0;text-align:center;font-size:13px;border-radius:8px;cursor:pointer;border:none;background:none;font-family:var(--sans);color:var(--ink3);}
+.seg.on{background:var(--cream);color:var(--ink);font-weight:500;border:0.5px solid var(--s3);}
+.sched-meta{display:flex;align-items:center;justify-content:space-between;padding:0 20px 12px;flex-shrink:0;}
+.start-label{font-size:11px;color:var(--ink3);letter-spacing:0.07em;text-transform:uppercase;}
+.start-select{background:var(--cream);border:0.5px solid var(--s3);border-radius:8px;padding:6px 10px;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--ink);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;padding-right:24px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A8578' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;}
+.live-tracker{margin:0 20px 14px;background:var(--cream);border:0.5px solid var(--s3);border-radius:14px;padding:14px 16px;flex-shrink:0;}
+.lt-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.lt-label{font-size:11px;color:var(--ink3);letter-spacing:0.08em;text-transform:uppercase;font-weight:500;}
+.lt-score{font-family:var(--serif);font-size:28px;font-weight:600;line-height:1;}
+.lt-status{font-size:11px;margin-top:2px;font-weight:500;}
+.lt-track{height:8px;border-radius:8px;position:relative;overflow:hidden;background:var(--s2);margin-bottom:5px;}
+.lt-fill{position:absolute;top:0;height:8px;border-radius:8px;transition:width .45s ease,left .45s ease;}
+.lt-center{position:absolute;top:-3px;left:50%;width:2px;height:14px;margin-left:-1px;border-radius:2px;}
+.lt-axis{display:flex;justify-content:space-between;margin-bottom:10px;}
+.lt-axis-lbl{font-size:10px;color:var(--ink3);}
+.tl-wrap{padding:4px 20px 16px;}
+.tl-entry{display:flex;gap:10px;margin-bottom:4px;}
+.tl-time{font-size:12px;color:var(--ink3);padding-top:16px;min-width:48px;text-align:right;flex-shrink:0;}
+.tl-spine{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:14px;}
+.tl-dot{width:10px;height:10px;border-radius:50%;margin-top:16px;flex-shrink:0;}
+.tl-dot.pending{background:var(--s3);}
+.tl-dot.done{background:var(--g);}
+.tl-line{width:1.5px;flex:1;margin-top:2px;}
+.tl-line.done{background:var(--g3);}
+.tl-line.pending{background:var(--s3);}
+.tl-card{flex:1;background:var(--cream);border:0.5px solid var(--s3);border-radius:12px;padding:10px 12px;margin-bottom:6px;}
+.tl-card.done{background:#F7FAF6;border-color:var(--g3);}
+.tl-card.work-card{border-left:3px solid var(--amber-l);}
+.card-inner{display:flex;align-items:stretch;gap:8px;}
+.move-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;flex-shrink:0;padding:2px 0;}
+.mbtn{width:26px;height:26px;border-radius:7px;border:0.5px solid var(--s3);background:var(--s2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;user-select:none;}
+.mbtn:active{background:var(--g4);}
+.mbtn.off{opacity:0.2;pointer-events:none;}
+.grip{display:flex;align-items:center;justify-content:center;cursor:grab;opacity:0.35;flex-shrink:0;width:26px;height:20px;}
+.card-body{flex:1;min-width:0;}
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.act-name{font-size:14px;font-weight:500;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:128px;}
+.act-name.done{color:var(--ink3);text-decoration:line-through;}
+.card-right{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.dur-pill{font-size:12px;color:var(--g2);background:var(--g4);padding:3px 8px;border-radius:20px;}
+.work-pill{font-size:11px;color:var(--amber);background:var(--amber-ll);padding:3px 8px;border-radius:20px;font-weight:500;}
+.del-btn{width:22px;height:22px;border-radius:6px;border:0.5px solid var(--red-l);background:var(--red-ll);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+.dz-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;}
+.dz-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.done-btn{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:0.5px solid var(--g3);background:var(--g4);color:var(--g2);font-family:var(--sans);}
+.done-btn.completed{background:var(--g);border-color:var(--g);color:var(--cream);cursor:default;}
+.tend{padding:6px 0 2px;display:flex;justify-content:center;}
+.tend-lbl{font-size:11px;color:var(--ink3);letter-spacing:0.08em;text-transform:uppercase;}
+.sched-empty{padding:32px 24px;text-align:center;}
+.sched-empty-icon{width:56px;height:56px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.sched-empty-title{font-family:var(--serif);font-size:17px;color:var(--ink);margin-bottom:6px;}
+.sched-empty-sub{font-size:13px;color:var(--ink3);line-height:1.6;margin-bottom:18px;}
+.go-cat-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:var(--g);color:var(--cream);border:none;border-radius:10px;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;}
+
+/* ── ADD FORM ── */
+.fb{margin-bottom:18px;}
+.fl{font-size:11px;color:var(--ink3);letter-spacing:0.08em;text-transform:uppercase;font-weight:500;display:block;margin-bottom:6px;}
+.fi{width:100%;background:var(--s2);border:0.5px solid var(--s3);border-radius:10px;padding:11px 14px;font-family:var(--sans);font-size:14px;color:var(--ink);outline:none;}
+.fi:focus{border-color:var(--g);}
+.dur-row{display:flex;gap:6px;}
+.db{flex:1;padding:11px 0;text-align:center;font-size:13px;border-radius:10px;border:0.5px solid var(--s3);background:var(--s2);color:var(--ink2);cursor:pointer;font-family:var(--sans);transition:all .15s;}
+.db.sel{background:var(--g4);border-color:var(--g3);color:var(--g2);font-weight:500;}
+.work-toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--cream);border:0.5px solid var(--s3);border-radius:12px;padding:13px 16px;}
+.work-toggle-label{font-size:14px;color:var(--ink);}
+.toggle-track{width:44px;height:24px;border-radius:20px;background:var(--s3);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle-track.on{background:var(--g);}
+.toggle-knob{width:18px;height:18px;border-radius:50%;background:var(--cream);position:absolute;top:3px;left:3px;transition:left .2s;}
+.toggle-track.on .toggle-knob{left:23px;}
+.dz-wrap{position:relative;}
+.dz-trigger{width:100%;background:var(--cream);border:0.5px solid var(--s3);border-radius:12px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.dz-trigger.open{border-color:var(--g);border-radius:12px 12px 0 0;}
+.dz-tl{display:flex;align-items:center;gap:12px;}
+.dz-sw{width:26px;height:26px;border-radius:7px;flex-shrink:0;}
+.dz-tv{font-family:var(--serif);font-size:20px;font-weight:600;}
+.dz-ch{flex-shrink:0;transition:transform .2s;}
+.dz-ch.open{transform:rotate(180deg);}
+.dz-list{background:var(--cream);border:0.5px solid var(--g);border-top:none;border-radius:0 0 12px 12px;overflow:hidden;max-height:0;transition:max-height .25s ease;}
+.dz-list.open{max-height:340px;overflow-y:auto;}
+.dz-opt{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;border-top:0.5px solid var(--s3);}
+.dz-opt:first-child{border-top:none;}
+.dz-opt:active{background:var(--s);}
+.dz-opt.selected{background:var(--s2);}
+.dz-osw{width:20px;height:20px;border-radius:5px;flex-shrink:0;}
+.dz-ov{font-family:var(--serif);font-size:15px;font-weight:600;}
+.dz-och{margin-left:auto;}
+.dest-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:12px 0;border-radius:8px;font-size:10.5px;font-weight:500;font-family:var(--sans);cursor:pointer;transition:background .12s;border:0.5px solid;}
+.dest-btn.free{background:var(--g4);border-color:var(--g3);color:var(--g2);}
+.dest-btn.withwork{background:var(--amber-ll);border-color:var(--amber-l);color:var(--amber);}
+.add-cat-btn{width:100%;background:var(--s2);color:var(--ink2);border:0.5px solid var(--s3);border-radius:12px;padding:14px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;margin-top:8px;}
+.toast{background:var(--ink);color:var(--cream);font-size:13px;padding:11px 18px;border-radius:12px;text-align:center;opacity:0;transition:opacity .2s;margin:10px 0 0;}
+.toast.show{opacity:1;}
+
+/* ── CATALOGUE ── */
+.cat-toast{margin:0 20px 12px;background:var(--g);color:var(--cream);font-size:13px;padding:11px 18px;border-radius:12px;text-align:center;opacity:0;transition:opacity .2s;flex-shrink:0;}
+.cat-toast.show{opacity:1;}
+.cf{padding:6px 12px;border-radius:20px;font-size:12px;border:0.5px solid var(--s3);background:none;color:var(--ink3);cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;}
+.cf.on{background:var(--s2);border-color:var(--s4);color:var(--ink2);font-weight:500;}
+.totals-banner{margin:0 20px 16px;background:var(--cream);border:0.5px solid var(--s3);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;flex-shrink:0;}
+.total-cell{display:flex;flex-direction:column;gap:3px;}
+.total-cell-label{font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;}
+.total-cell-val{font-family:var(--serif);font-size:22px;font-weight:600;}
+.total-cell-sub{font-size:11px;color:var(--ink3);}
+.cat-sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.cat-sec-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cat-sec-title{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink);}
+.cat-sec-meta{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.cat-sec-rule{height:1px;background:var(--s3);margin-bottom:14px;}
+.hours-tile{display:flex;align-items:center;gap:6px;border-radius:8px;padding:5px 10px;border:0.5px solid;}
+.hours-tile.personal{border-color:var(--g3);background:var(--g4);}
+.hours-tile.work{border-color:var(--amber-l);background:var(--amber-ll);}
+.hours-tile-val{font-family:var(--serif);font-size:16px;font-weight:600;}
+.hours-tile.personal .hours-tile-val{color:var(--g2);}
+.hours-tile.work .hours-tile-val{color:var(--amber);}
+.hours-tile-lbl{font-size:10px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;}
+.hours-tile.personal .hours-tile-lbl{color:var(--g2);}
+.hours-tile.work .hours-tile-lbl{color:var(--amber);}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.cat-item{background:var(--cream);border:0.5px solid var(--s3);border-radius:12px;padding:12px 14px;}
+.cat-item.work{border-left:3px solid var(--amber-l);}
+.cat-item-name{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:8px;}
+.cat-item-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.dest-row{display:flex;gap:6px;}
+.empty-half{padding:20px 0;text-align:center;font-size:13px;color:var(--ink3);font-style:italic;}
+
+/* ── GUIDE ── */
+.guide-hero{background:var(--g);padding:24px 20px 20px;flex-shrink:0;}
+.g-eye{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:6px;}
+.g-title{font-family:var(--serif);font-size:24px;font-weight:600;color:#fff;line-height:1.2;margin-bottom:8px;}
+.g-sub{font-size:13px;color:rgba(255,255,255,0.85);line-height:1.6;}
+.g-section{margin-top:22px;}
+.g-section-title{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--s3);}
+.g-p{font-size:14px;color:var(--ink2);line-height:1.7;margin-bottom:12px;}
+.g-quote{background:var(--g4);border-left:3px solid var(--g);padding:14px 16px;margin:16px 0;}
+.g-quote-text{font-family:var(--serif);font-size:15px;color:var(--g2);line-height:1.6;font-style:italic;}
+.g-step{background:var(--cream);border:0.5px solid var(--s3);border-radius:12px;padding:14px 16px;margin-bottom:10px;}
+.g-step.amber{border-color:var(--amber-l);}
+.g-step-num{font-size:11px;letter-spacing:0.08em;text-transform:uppercase;font-weight:500;margin-bottom:4px;}
+.g-step-num.green{color:var(--g2);}
+.g-step-num.amber{color:var(--amber);}
+.g-step-text{font-size:14px;color:var(--ink);line-height:1.6;}
+.g-step-note{font-size:12px;color:var(--ink3);margin-top:6px;font-style:italic;line-height:1.5;}
+.g-16{background:var(--ink);border-radius:12px;padding:18px 16px;margin:16px 0;}
+.g-16-num{font-family:var(--serif);font-size:42px;font-weight:600;color:var(--g3);line-height:1;}
+.g-16-label{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:4px;margin-bottom:10px;}
+.g-16-text{font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;}
+.g-part-divider{height:2px;background:var(--s3);margin:28px 0;border-radius:2px;position:relative;}
+.g-part-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--s);padding:0 10px;font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;}
+.g-work-hero{background:var(--amber);padding:18px 20px;border-radius:12px;margin-top:24px;}
+.g-work-label{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.75);margin-bottom:4px;}
+.g-work-title{font-family:var(--serif);font-size:20px;font-weight:600;color:#fff;line-height:1.2;margin-bottom:6px;}
+.g-work-sub{font-size:13px;color:rgba(255,255,255,0.9);line-height:1.6;}
+.g-insight{background:var(--ink);border-radius:12px;padding:16px;margin:16px 0;}
+.g-insight-lbl{font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:6px;}
+.g-insight-text{font-size:13px;color:#fff;line-height:1.65;font-style:italic;}
+.g-cta-green{padding:14px 16px;background:var(--g4);border:0.5px solid var(--g3);border-radius:12px;margin-top:20px;}
+.g-cta-amber{padding:14px 16px;background:var(--amber-ll);border:0.5px solid var(--amber-l);border-radius:12px;margin-top:20px;}
+.cta-btn{display:flex;align-items:center;gap:6px;padding:10px 16px;border:none;border-radius:10px;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;width:100%;justify-content:center;margin-top:10px;}
+.cta-btn.green{background:var(--g);color:#fff;}
+.cta-btn.amber{background:var(--amber);color:#fff;}
+.cta-lbl{font-size:12px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;}
+.cta-lbl.green{color:var(--g2);}
+.cta-lbl.amber{color:var(--amber);}
+.g-tag{display:inline-flex;align-items:center;background:var(--g4);color:var(--g2);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:500;margin:3px 3px 3px 0;}
+.g-tag.amber{background:var(--amber-ll);color:var(--amber);}
+
+/* ── 10 YR MODULE ── */
+.yr-hero{background:var(--ink);padding:24px 20px 18px;flex-shrink:0;}
+.ov-card{background:var(--cream);border:0.5px solid var(--s3);border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;}
+.ov-card.locked{opacity:0.45;cursor:default;pointer-events:none;}
+.ov-top{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+.ov-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ov-title{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink);}
+.ov-sub{font-size:13px;color:var(--ink3);line-height:1.55;}
+.ov-check{width:22px;height:22px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;margin-left:auto;flex-shrink:0;}
+.ov-empty{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--s3);margin-left:auto;flex-shrink:0;}
+.ov-val{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--g2);margin-top:6px;}
+.prog-wrap{margin-top:8px;}
+.prog-track{height:5px;background:var(--s3);border-radius:5px;overflow:hidden;}
+.prog-fill{height:5px;background:var(--g);border-radius:5px;transition:width .4s ease;}
+.prog-labels{display:flex;justify-content:space-between;margin-top:4px;}
+.prog-lbl{font-size:10px;color:var(--ink3);}
+
+/* cost form */
+.cost-section-hdr{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--s3);}
+.cost-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.cost-label{font-size:13px;color:var(--ink2);flex:1;line-height:1.4;}
+.cost-input-wrap{position:relative;flex-shrink:0;}
+.cost-dollar{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--ink3);pointer-events:none;}
+.cost-input{width:110px;background:var(--s2);border:0.5px solid var(--s3);border-radius:8px;padding:8px 10px 8px 20px;font-family:var(--sans);font-size:13px;color:var(--ink);outline:none;text-align:right;}
+.cost-input:focus{border-color:var(--g);}
+.cost-input.filled{border-color:var(--g3);background:var(--g4);}
+.dream-summary{margin:20px 20px 0;background:var(--g);border-radius:14px;padding:18px;}
+.ds-label{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:4px;}
+.ds-val{font-family:var(--serif);font-size:32px;font-weight:600;color:#fff;line-height:1;margin-bottom:12px;}
+.ds-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ds-cell{background:rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;}
+.ds-cell-lbl{font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;}
+.ds-cell-val{font-family:var(--serif);font-size:17px;font-weight:600;color:#fff;}
+.ds-count{font-size:12px;color:rgba(255,255,255,0.65);margin-top:10px;}
+
+/* loading */
+.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px;}
+.loading-spinner{width:32px;height:32px;border:2.5px solid var(--s3);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-label{font-size:13px;color:var(--ink3);}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- STATUS BAR -->
+  <div class="statusbar dark" id="statusbar">
+    <span class="st dark" id="st-time">9:41</span>
+    <div class="si">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="none"><rect x="0" y="4" width="3" height="8" rx="1" fill="white" opacity=".35"/><rect x="4.5" y="2.5" width="3" height="9.5" rx="1" fill="white" opacity=".6"/><rect x="9" y="0" width="3" height="12" rx="1" fill="white" opacity=".85"/><rect x="13.5" y="1" width="2.5" height="10" rx="1" fill="white"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 3C5.5 3 3.3 4.1 1.8 5.9L0 4C2 1.5 4.8 0 8 0s6 1.5 8 4l-1.8 1.9C12.7 4.1 10.5 3 8 3z" fill="white" opacity=".35"/><path d="M8 6.5c-1.5 0-2.8.6-3.8 1.6L2.5 6.4C4 4.9 5.9 4 8 4s4 .9 5.5 2.4l-1.7 1.7C10.8 7.1 9.5 6.5 8 6.5z" fill="white" opacity=".7"/><circle cx="8" cy="11" r="1.5" fill="white"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="15" height="9" rx="2.5" fill="white"/><path d="M23 4.5v3c.8-.4 1.3-1 1.3-1.5s-.5-1.1-1.3-1.5z" fill="white" opacity=".4"/></svg>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="view on" id="v-loading">
+    <div class="loading-screen">
+      <div class="loading-spinner"></div>
+      <div class="loading-label">Loading The Dope Zone…</div>
+    </div>
+  </div>
+
+  <!-- WELCOME -->
+  <div class="view" id="v-welcome">
+    <div class="intro-hero">
+      <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:10px;">Intentional Lifestyle Design</div>
+      <div style="font-family:var(--serif);font-size:34px;font-weight:600;color:#fff;line-height:1.08;margin-bottom:12px;">Welcome to the <span style="color:var(--g3);">Dope Zone.</span></div>
+      <div style="font-size:14px;color:rgba(255,255,255,0.62);line-height:1.65;">A state of mind where you are completely unfuckable with.</div>
+      <div class="page-dots dark"><div class="pdot on"></div><div class="pdot"></div><div class="pdot"></div></div>
+    </div>
+    <div class="scroll"><div class="pad" style="padding-top:22px;">
+      <div class="intro-p">The Dope Zone is a state of mind where you are un-fuck-able with. Nothing can ruin your perspective on the fact that everything in your life is dope at that moment in time. Regardless of whatever external scenario takes place, you can't help but maintain a positive perspective and see the bright side of a situation or a solution.</div>
+      <div class="intro-p">We all know what this feels like and have been there before, and we all wish that we could experience that perspective permanently and it would never end.</div>
+      <div class="pull-quote"><div class="pq">The Dope Zone doesn't just happen by accident. It is a result of a <em>sequence of events</em> and your subconscious emotional and physical reactions to those events — based on the chemicals that your body and mind excrete.</div></div>
+      <div class="intro-p">These chemicals being released are a result of the conditioning that you have experienced in the past from the same or similar scenarios in your life before.</div>
+      <div class="divider"></div>
+      <div class="sec-lbl">What this program gives you</div>
+      <div class="tool-card"><div class="tool-icon" style="background:var(--g4);"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9h10M4 5h10M4 13h6" stroke="#5C7A55" stroke-width="1.4" stroke-linecap="round"/></svg></div><div><div class="tool-name">Tools</div><div class="tool-desc">Practical frameworks you apply every day to track and understand your energy.</div></div></div>
+      <div class="tool-card"><div class="tool-icon" style="background:var(--amber-ll);"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="#BA7517" stroke-width="1.4"/><path d="M9 6v3l2 2" stroke="#BA7517" stroke-width="1.4" stroke-linecap="round"/></svg></div><div><div class="tool-name">Concepts</div><div class="tool-desc">A new way of thinking about energy, rhythm, and intentional design of your day.</div></div></div>
+      <div class="tool-card"><div class="tool-icon" style="background:var(--s2);"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M5 9l3 3 5-5" stroke="#8A8578" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="2" y="2" width="14" height="14" rx="3" stroke="#8A8578" stroke-width="1.4"/></svg></div><div><div class="tool-name">Disciplines</div><div class="tool-desc">Repeatable habits and practices that build toward a permanent Dope Zone state.</div></div></div>
+      <div class="divider"></div>
+      <div class="sec-lbl">The Dope Zone scale</div>
+      <div class="dz-scale-wrap">
+        <div class="dz-scale-lbl">Your energetic range</div>
+        <div class="dz-track">
+          <div class="dz-pip" style="background:#712B13;color:#FAECE7;">-5</div>
+          <div class="dz-pip" style="background:#D85A30;color:#FAECE7;">-3</div>
+          <div class="dz-pip" style="background:#F5C4B3;color:#993C1D;">-1</div>
+          <div class="dz-pip" style="background:var(--g4);color:var(--g2);border:1.5px solid var(--g3);font-size:10px;">DZ</div>
+          <div class="dz-pip" style="background:#C0DD97;color:#27500A;">+1</div>
+          <div class="dz-pip" style="background:#639922;color:#EAF3DE;">+3</div>
+          <div class="dz-pip" style="background:#27500A;color:#EAF3DE;">+5</div>
+        </div>
+        <div class="dz-axis"><span class="dz-ax">Drained</span><span class="dz-ax-mid">Dope Zone (−2 to +2)</span><span class="dz-ax">Energised</span></div>
+      </div>
+      <button class="prim-btn" onclick="nav('v-bio')">Meet your coach →</button>
+      <div class="sec-note">1 of 3</div>
+    </div></div>
+  </div>
+
+  <!-- BIO -->
+  <div class="view" id="v-bio">
+    <div class="intro-hero">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--g2);display:flex;align-items:center;justify-content:center;margin-bottom:14px;border:3px solid rgba(255,255,255,0.12);"><span style="font-family:var(--serif);font-size:28px;font-weight:600;color:#fff;">C</span></div>
+      <div style="font-family:var(--serif);font-size:26px;font-weight:600;color:#fff;margin-bottom:4px;">Clinton</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.55);">EOS Implementer · Entrepreneur · Lifestyle Design Coach</div>
+      <div class="page-dots dark"><div class="pdot"></div><div class="pdot on"></div><div class="pdot"></div></div>
+    </div>
+    <div class="scroll"><div class="pad" style="padding-top:22px;">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;">
+        <span style="display:inline-flex;align-items:center;background:var(--amber-ll);border:0.5px solid var(--amber-l);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--amber);">EOS Implementer</span>
+        <span style="display:inline-flex;align-items:center;background:var(--g4);border:0.5px solid var(--g3);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--g2);">9+ years leadership</span>
+      </div>
+      <div class="bio-p">Clinton is a successful entrepreneur with over 9 years of experience in leadership and coaching as a business owner, growing his own Medical Record Review company while also serving as VP of Sales for a Health and Wellness Start Up.</div>
+      <div class="bio-p">He is currently an Implementer of the Entrepreneurial Operating System, helping entrepreneurs and business owners get more of what they want from their business. He was introduced to EOS as a client — and after seeing the power of the EOS model transform his own business and life, he took the leap to help other entrepreneurs do the same.</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-num">9<span class="stat-unit">+ yrs</span></div><div class="stat-lbl">Leadership & coaching experience</div></div>
+        <div class="stat-card"><div class="stat-num">2<span class="stat-unit">x</span></div><div class="stat-lbl">Business owner & VP of Sales</div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="sec-lbl">The turning point</div>
+      <div class="bio-p">In 2020, Clinton experienced a major health scare leaving him with a fairly terminal diagnosis at an early age. Doctors told him he had a rare autoimmune condition that had never been cured or reversed.</div>
+      <div class="bio-callout"><div class="bio-callout-text">Over the following year and a half, Clinton set out to do exactly what no one had done — and successfully cured his ailment. He contributes a large portion of his recovery to intentionally redesigning his perspective and lifestyle.</div></div>
+      <div class="bio-p">Through documenting his recovery journey, Clinton developed the frameworks and disciplines that now form the foundation of the Intentional Lifestyle Design program.</div>
+      <div class="mission-card"><div class="mission-label">Clinton's mission</div><div class="mission-text">To help entrepreneurs achieve not only <em>financial success</em> with their business, but <em>internal success</em> within their personal lives.</div></div>
+      <button class="prim-btn" onclick="nav('v-modules')">See the program →</button>
+      <div class="sec-note">2 of 3</div>
+    </div></div>
+  </div>
+
+  <!-- MODULES -->
+  <div class="view" id="v-modules">
+    <div class="intro-hero">
+      <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:8px;">Your program</div>
+      <div style="font-family:var(--serif);font-size:26px;font-weight:600;color:#fff;margin-bottom:6px;">Your journey begins here.</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;">Each module builds on the last.</div>
+      <div class="page-dots dark"><div class="pdot"></div><div class="pdot"></div><div class="pdot on"></div></div>
+    </div>
+    <div class="scroll"><div class="pad" style="padding-top:20px;">
+      <div class="mod-card" onclick="enterSched()"><div class="mod-num active">1</div><div class="mod-info"><div class="mod-name">Perfect Schedule</div><div class="mod-desc">Build your ideal day and track your Dope Zone in real time.</div></div><span class="mod-badge active">Active</span></div>
+      <div class="mod-card" onclick="enter10yr()"><div class="mod-num" style="background:var(--s2);color:var(--ink3);">2</div><div class="mod-info"><div class="mod-name">10 Year Dream Lifestyle</div><div class="mod-desc">Define the cost of your dream life and map the gap.</div></div><span class="mod-badge active">Active</span></div>
+      <div class="mod-card locked"><div class="mod-num">3</div><div class="mod-info"><div class="mod-name">Personal Growth Scorecard</div><div class="mod-desc">Daily accountability to the things that fill you up.</div></div><span class="mod-badge soon">Coming soon</span></div>
+      <div class="mod-card locked"><div class="mod-num">4</div><div class="mod-info"><div class="mod-name">Relationship Mapping</div><div class="mod-desc">The energetic impact of the key relationships in your life.</div></div><span class="mod-badge soon">Coming soon</span></div>
+    </div></div>
+  </div>
+
+  <!-- M1: SCHEDULE -->
+  <div class="view" id="m1-schedule">
+    <div class="hdr">
+      <div class="hdr-row" style="justify-content:space-between;">
+        <div style="display:flex;align-items:center;">
+          <div style="font-family:var(--serif);font-size:22px;font-weight:600;color:var(--ink);">Perfect Schedule</div>
+          <span class="save-dot" id="saveDot"></span>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <div class="hbtn" onclick="nav('v-modules')"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="#1C1C18" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="#1C1C18" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="#1C1C18" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="#1C1C18" stroke-width="1.2"/></svg></div>
+        </div>
+      </div>
+      <div class="seg-row">
+        <button class="seg on" id="sf" onclick="setSchedMode('free')">Without work</button>
+        <button class="seg" id="sw" onclick="setSchedMode('work')">With work</button>
+      </div>
+    </div>
+    <div class="sched-meta">
+      <div style="display:flex;align-items:center;gap:8px;"><span class="start-label">Start</span><select class="start-select" id="startTime" onchange="onStartChange()"></select></div>
+      <div id="total-disp" style="font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.07em;"></div>
+    </div>
+    <div class="scroll">
+      <div id="live-tracker-wrap"></div>
+      <div class="tl-wrap" id="tl"></div>
+    </div>
+  </div>
+
+  <!-- M1: NEW -->
+  <div class="view" id="m1-new">
+    <div class="hdr">
+      <div class="hdr-row"><div class="hbk" onclick="showM1('m1-cat');activateM1Nav('bn-cat')"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#1C1C18" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="htitle">New activity</div></div>
+      <div class="hsub">Saved to catalogue &amp; schedule</div>
+    </div>
+    <div class="scroll"><div class="pad" style="padding-top:8px;">
+      <div class="fb"><label class="fl">Activity name</label><input class="fi" id="newName" placeholder="e.g. Morning surf, journaling..."></div>
+      <div class="fb"><label class="fl">Duration</label><div class="dur-row"><button class="db" onclick="selDur(this,15)">15m</button><button class="db" onclick="selDur(this,30)">30m</button><button class="db sel" onclick="selDur(this,60)">1h</button><button class="db" onclick="selDur(this,90)">1.5h</button><button class="db" onclick="selDur(this,120)">2h</button></div></div>
+      <div class="fb"><label class="fl">Type</label><div class="work-toggle-row" onclick="toggleWorkType()"><span class="work-toggle-label" id="workTypeLabel">Personal activity</span><div class="toggle-track" id="workToggle"><div class="toggle-knob"></div></div></div></div>
+      <div class="fb"><label class="fl">Dope Zone Rating</label><div class="dz-wrap"><div class="dz-trigger" id="dzTrig" onclick="toggleDZ()"><div class="dz-tl"><div class="dz-sw" id="dzSwatch" style="background:#C0DD97;"></div><div class="dz-tv" id="dzValDisp" style="color:#3B6D11;">+1</div></div><svg class="dz-ch" id="dzCh" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#8A8578" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="dz-list" id="dzList"></div></div></div>
+      <div class="fb"><label class="fl">Add to schedule</label>
+        <div style="display:flex;gap:8px;"><button class="dest-btn free" onclick="addNewAct('free')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="#5C7A55" stroke-width="1.3"/><path d="M6 4v2.5l1.5 1.5" stroke="#5C7A55" stroke-width="1.3" stroke-linecap="round"/></svg>Without work</button><button class="dest-btn withwork" onclick="addNewAct('work')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="4" width="10" height="7" rx="1.3" stroke="#BA7517" stroke-width="1.3"/><path d="M3.5 4V3a2.5 2.5 0 015 0v1" stroke="#BA7517" stroke-width="1.3" stroke-linecap="round"/></svg>With work</button></div>
+        <button class="add-cat-btn" onclick="addNewAct(null)">Save to catalogue only</button>
+      </div>
+      <div class="toast" id="toast2"></div>
+    </div></div>
+  </div>
+
+  <!-- M1: CATALOGUE -->
+  <div class="view" id="m1-cat">
+    <div class="hdr">
+      <div class="hdr-row" style="justify-content:space-between;">
+        <div style="font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink);">Dope Zone Catalogue</div>
+        <div style="display:flex;align-items:center;gap:8px;"><div id="cat-count" style="font-size:12px;color:var(--ink3);"></div><div class="hbtn" onclick="showM1('m1-new');activateM1Nav('bn-new')" style="width:32px;height:32px;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="#1C1C18" stroke-width="1.4" stroke-linecap="round"/></svg></div></div>
+      </div>
+      <div class="hsub" style="margin-top:-2px;">Select activities to add to your schedule</div>
+    </div>
+    <div class="cat-toast" id="catToast"></div>
+    <div id="totals-banner-wrap"></div>
+    <div style="padding:0 20px 10px;display:flex;gap:5px;flex-shrink:0;"><button class="cf on" onclick="setFilter(this,'all')">All</button><button class="cf" onclick="setFilter(this,'positive')">Positive</button><button class="cf" onclick="setFilter(this,'negative')">Negative</button></div>
+    <div class="scroll"><div class="pad" style="padding-top:4px;" id="catContent"></div></div>
+  </div>
+
+  <!-- M1: GUIDE -->
+  <div class="view" id="m1-guide">
+    <div class="guide-hero"><div class="g-eye">Intentional Lifestyle Design</div><div class="g-title">Perfect Schedule Guide</div><div class="g-sub">Your complete instructions for building your perfect energetic rhythm.</div></div>
+    <div class="scroll"><div class="pad" style="padding-top:0;">
+      <div class="g-section"><div class="g-p" style="margin-top:20px;">We are beginning the journey to define what perfect energetic rhythm looks like to you. Deepen the understanding of how an activity over a certain period of time affects you energetically and emotionally.</div><div class="g-p" style="font-weight:500;color:var(--ink);">To remain in your Dope Zone.</div></div>
+      <div class="divider"></div>
+      <div class="g-section"><div class="g-section-title">What is the Dope Zone?</div><div class="g-p">The Dope Zone is a state of mind where everything is dope. We have all been in a state of mind so perfect and balanced that not even the worst situation can ruin our mood.</div><div class="g-quote"><div class="g-quote-text">You've slept 8 hours, ate healthy, and exercised. Your mind is clear. You are present, relaxed, content, and happy.</div></div><div class="g-p">We use a sliding + and − scale. For most, the Dope Zone's range is +2 on the high end and −2 on the low. Our objective is to stay within the Dope Zone as much as possible.</div></div>
+      <div class="divider"></div>
+      <div class="g-section"><div class="g-section-title">Schedules we will create</div><div class="g-p" style="margin-bottom:10px;">Perfect Day without Work</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;"><span class="g-tag">Summer</span><span class="g-tag">Fall</span><span class="g-tag">Winter</span><span class="g-tag">Spring</span></div><div class="g-p" style="margin-bottom:10px;">Perfect Day with Work</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;"><span class="g-tag">Summer</span><span class="g-tag">Fall</span><span class="g-tag">Winter</span><span class="g-tag">Spring</span><span class="g-tag amber">Meeting focused</span><span class="g-tag amber">Project execution</span></div></div>
+      <div class="divider"></div>
+      <div class="g-section"><div class="g-section-title">The 16 Hour Fundamental</div><div class="g-16"><div class="g-16-num">16</div><div class="g-16-label">Hours awake each day</div><div class="g-16-text">If you get 8 hours of sleep per night, you have 16 hours of being awake. Your Perfect Day activities must total 16 hours.</div></div></div>
+      <div class="divider"></div>
+      <div class="g-section"><div class="g-section-title">Crafting your Perfect Day without Work</div>
+        <div class="g-step"><div class="g-step-num green">Step 1</div><div class="g-step-text">Establish an unrealistic state of mind — you have no responsibilities.</div></div>
+        <div class="g-step"><div class="g-step-num green">Step 2</div><div class="g-step-text">Identify the activities that fill you up emotionally, spiritually, mentally, physically, and energetically.</div></div>
+        <div class="g-step"><div class="g-step-num green">Step 3</div><div class="g-step-text">Clearly define the perfect amount of time spent on each activity.</div></div>
+        <div class="g-step"><div class="g-step-num green">Step 4</div><div class="g-step-text">Order these activities in the order that you believe is your definition of the perfect energetic order.</div><div class="g-step-note">Disperse into as many blocks as you like. Get creative.</div></div>
+        <div class="g-step"><div class="g-step-num green">Step 5</div><div class="g-step-text">Adhere to the 16 Hour Fundamental — ensure your collective activity hours total 16.</div></div>
+        <div class="g-cta-green"><div class="cta-lbl green">Ready to begin?</div><div style="font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:2px;">Head to the Catalogue to start adding your activities.</div><button class="cta-btn green" onclick="showM1('m1-cat');activateM1Nav('bn-cat')"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="white" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="white" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="white" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="white" stroke-width="1.2"/></svg>Open the Catalogue</button></div>
+      </div>
+      <div class="g-part-divider"><span class="g-part-label">Next step</span></div>
+      <div class="g-work-hero"><div class="g-work-label">Part 2</div><div class="g-work-title">Perfect Day with Work</div><div class="g-work-sub">Blend your dream life and current life together.</div></div>
+      <div class="g-section">
+        <div class="g-step amber"><div class="g-step-num amber">Step 1</div><div class="g-step-text">Take a step back into the present moment, while maintaining that things can be whatever way you would like them to be.</div></div>
+        <div class="g-step amber"><div class="g-step-num amber">Step 2</div><div class="g-step-text">Identify the 5–7 major work activities you perform on a weekly basis.</div><div class="g-step-note">Examples: Sales, Marketing, Management, Finances, Admin, Customer service</div></div>
+        <div class="g-step amber"><div class="g-step-num amber">Step 3</div><div class="g-step-text">Define the actual time spent on each work activity per day. Rate each with a Dope Zone score.</div></div>
+        <div class="g-insight"><div class="g-insight-lbl">Key insight</div><div class="g-insight-text">The goal is counterintuitive — we are fitting work INTO our personal life. Not the other way around.</div></div>
+        <div class="g-step amber"><div class="g-step-num amber">Step 4</div><div class="g-step-text">Shorten or group personal activities to make room for work, keeping as many as possible.</div></div>
+        <div class="g-step amber"><div class="g-step-num amber">Step 5</div><div class="g-step-text">Adhere to the 16 Hour Fundamental — combined schedule must total 16 hours.</div></div>
+        <div class="g-cta-amber"><div class="cta-lbl amber">Ready to build your work schedule?</div><button class="cta-btn amber" onclick="setSchedMode('work');showM1('m1-schedule');activateM1Nav('bn-sched')"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="9" rx="1.5" stroke="white" stroke-width="1.2"/><path d="M4 3V2a3 3 0 016 0v1" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>Open With Work Schedule</button></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- M1 NAV -->
+  <div class="bnav" id="bnav-m1">
+    <button class="bn on" id="bn-sched" onclick="showM1('m1-schedule');activateM1Nav('bn-sched')"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="14" rx="2" stroke="#5C7A55" stroke-width="1.4"/><path d="M3 9h16M7 2v3M15 2v3" stroke="#5C7A55" stroke-width="1.4" stroke-linecap="round"/></svg><span class="bn-lbl" style="color:#5C7A55;font-weight:500;">Schedule</span></button>
+    <button class="bn" id="bn-new" onclick="showM1('m1-new');activateM1Nav('bn-new')"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#8A8578" stroke-width="1.4"/><path d="M11 7v8M7 11h8" stroke="#8A8578" stroke-width="1.4" stroke-linecap="round"/></svg><span class="bn-lbl">New</span></button>
+    <button class="bn" id="bn-cat" onclick="showM1('m1-cat');activateM1Nav('bn-cat')"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#8A8578" stroke-width="1.4"/><rect x="12" y="3" width="7" height="7" rx="1.5" stroke="#8A8578" stroke-width="1.4"/><rect x="3" y="12" width="7" height="7" rx="1.5" stroke="#8A8578" stroke-width="1.4"/><rect x="12" y="12" width="7" height="7" rx="1.5" stroke="#8A8578" stroke-width="1.4"/></svg><span class="bn-lbl">Catalogue</span></button>
+    <button class="bn" id="bn-guide" onclick="showM1('m1-guide');activateM1Nav('bn-guide')"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#8A8578" stroke-width="1.4"/><path d="M11 10v6" stroke="#8A8578" stroke-width="1.4" stroke-linecap="round"/><circle cx="11" cy="7.5" r="1" fill="#8A8578"/></svg><span class="bn-lbl">Guide</span></button>
+  </div>
+
+  <!-- M2: OVERVIEW -->
+  <div class="view" id="m2-overview">
+    <div class="yr-hero"><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:5px;">Module 2</div><div style="font-family:var(--serif);font-size:26px;font-weight:600;color:#fff;line-height:1.15;margin-bottom:6px;">10 Year Dream Lifestyle</div><div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;">Define the life you are building toward.</div></div>
+    <div class="scroll"><div class="pad" style="padding-top:20px;">
+      <div style="font-size:13px;color:var(--ink3);line-height:1.65;margin-bottom:20px;">Start with an unrealistic state of mind. No limits, no responsibilities — just the life you truly want.</div>
+      <div class="ov-card" id="ov-costs-card" onclick="showM2('m2-costs');activateM2Nav('bn-costs')">
+        <div class="ov-top"><div class="ov-icon" style="background:var(--g4);"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v14M5 5.5h5.5a2 2 0 010 4H7a2 2 0 000 4H14" stroke="#5C7A55" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="flex:1;"><div class="ov-title">Dream Lifestyle Cost</div></div><div id="ov-costs-status"><div class="ov-empty"></div></div></div>
+        <div class="ov-sub">Housing, transport, travel, food, investments — what does your dream life actually cost?</div>
+        <div id="ov-costs-total" style="display:none;" class="ov-val"></div>
+        <div id="ov-costs-prog" style="display:none;" class="prog-wrap"><div class="prog-track"><div class="prog-fill" id="ov-prog-fill" style="width:0%;"></div></div><div class="prog-labels"><span class="prog-lbl" id="ov-prog-lbl"></span><span class="prog-lbl">16 line items</span></div></div>
+      </div>
+      <div class="ov-card locked"><div class="ov-top"><div class="ov-icon" style="background:var(--amber-ll);"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 13l4-4 3 3 5-6" stroke="#BA7517" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="flex:1;"><div class="ov-title">Progress Indicators</div></div><span style="margin-left:auto;font-size:11px;color:var(--ink3);background:var(--s2);padding:3px 9px;border-radius:20px;">Coming next</span></div><div class="ov-sub">Hours worked, income targets, and your dream hourly value.</div></div>
+      <div class="ov-card locked"><div class="ov-top"><div class="ov-icon" style="background:#E6F1FB;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9h12M9 3v12" stroke="#185FA5" stroke-width="1.4" stroke-linecap="round"/></svg></div><div style="flex:1;"><div class="ov-title">Gap Analysis</div></div><span style="margin-left:auto;font-size:11px;color:var(--ink3);background:var(--s2);padding:3px 9px;border-radius:20px;">Coming next</span></div><div class="ov-sub">Where you are today vs where you want to be in 10 years.</div></div>
+      <div class="ov-card locked"><div class="ov-top"><div class="ov-icon" style="background:var(--s2);"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="5.5" stroke="#8A8578" stroke-width="1.4"/><circle cx="9" cy="9" r="2" stroke="#8A8578" stroke-width="1.4"/></svg></div><div style="flex:1;"><div class="ov-title">Vision &amp; Goals</div></div><span style="margin-left:auto;font-size:11px;color:var(--ink3);background:var(--s2);padding:3px 9px;border-radius:20px;">Coming next</span></div><div class="ov-sub">Your north star — the life you are building toward.</div></div>
+    </div></div>
+  </div>
+
+  <!-- M2: COSTS -->
+  <div class="view" id="m2-costs">
+    <div class="hdr">
+      <div class="hdr-row"><div class="hbk" onclick="showM2('m2-overview');activateM2Nav('bn-overview')"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="#1C1C18" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink);">Dream Lifestyle Cost</div><span class="save-dot" id="saveDot2" style="margin-left:auto;"></span></div>
+      <div class="hsub">Enter what your dream life costs annually. Be unrealistic.</div>
+    </div>
+    <div class="scroll"><div id="costsForm" class="pad" style="padding-top:8px;"></div></div>
+  </div>
+
+  <!-- M2 NAV -->
+  <div class="bnav" id="bnav-m2">
+    <button class="bn on" id="bn-overview" onclick="showM2('m2-overview');activateM2Nav('bn-overview')"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M11 3l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z" stroke="#5C7A55" stroke-width="1.3" stroke-linejoin="round"/></svg><span class="bn-lbl" style="color:#5C7A55;font-weight:500;">Overview</span></button>
+    <button class="bn" id="bn-costs" onclick="showM2('m2-costs');activateM2Nav('bn-costs')"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M11 2v18M7 6.5h6a2.5 2.5 0 010 5H9a2.5 2.5 0 000 5H16" stroke="#8A8578" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="bn-lbl">Dream costs</span></button>
+    <button class="bn" id="bn-allmod" onclick="nav('v-modules')"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#8A8578" stroke-width="1.3"/><rect x="12" y="3" width="7" height="7" rx="1.5" stroke="#8A8578" stroke-width="1.3"/><rect x="3" y="12" width="7" height="7" rx="1.5" stroke="#8A8578" stroke-width="1.3"/><rect x="12" y="12" width="7" height="7" rx="1.5" stroke="#8A8578" stroke-width="1.3"/></svg><span class="bn-lbl">All modules</span></button>
+  </div>
+
+</div><!-- end #app -->
+
+<script>
+// ── DZ DATA ──────────────────────────────────────────────────────────────────
+const DZ=[
+  {v:-5,lbl:'-5',sw:'#712B13',tagBg:'#FAECE7',tagTxt:'#712B13'},
+  {v:-4,lbl:'-4',sw:'#993C1D',tagBg:'#FAECE7',tagTxt:'#993C1D'},
+  {v:-3,lbl:'-3',sw:'#D85A30',tagBg:'#F5C4B3',tagTxt:'#712B13'},
+  {v:-2,lbl:'-2',sw:'#F0997B',tagBg:'#F5C4B3',tagTxt:'#993C1D'},
+  {v:-1,lbl:'-1',sw:'#F5C4B3',tagBg:'#FAECE7',tagTxt:'#993C1D'},
+  {v: 1,lbl:'+1',sw:'#C0DD97',tagBg:'#EAF3DE',tagTxt:'#3B6D11'},
+  {v: 2,lbl:'+2',sw:'#97C459',tagBg:'#C0DD97',tagTxt:'#27500A'},
+  {v: 3,lbl:'+3',sw:'#639922',tagBg:'#97C459',tagTxt:'#173404'},
+  {v: 4,lbl:'+4',sw:'#3B6D11',tagBg:'#639922',tagTxt:'#EAF3DE'},
+  {v: 5,lbl:'+5',sw:'#27500A',tagBg:'#27500A',tagTxt:'#EAF3DE'},
+];
+const getDZ=v=>DZ.find(d=>d.v===v)||DZ[5];
+
+// ── COST IDs ─────────────────────────────────────────────────────────────────
+const COST_FIELDS=[
+  {id:'c_mortgage',label:'Mortgage / rent',cat:'Housing'},
+  {id:'c_prop',label:'Property taxes & insurance',cat:'Housing'},
+  {id:'c_maint',label:'Home maintenance',cat:'Housing'},
+  {id:'c_car',label:'Car payment / lease',cat:'Transport'},
+  {id:'c_carrun',label:'Fuel, insurance & service',cat:'Transport'},
+  {id:'c_vacation',label:'Vacations & trips',cat:'Travel & experiences'},
+  {id:'c_exp',label:'Experiences & adventures',cat:'Travel & experiences'},
+  {id:'c_groc',label:'Groceries',cat:'Food & lifestyle'},
+  {id:'c_dining',label:'Dining & entertainment',cat:'Food & lifestyle'},
+  {id:'c_health',label:'Health & wellness',cat:'Food & lifestyle'},
+  {id:'c_cloth',label:'Clothing & personal',cat:'Food & lifestyle'},
+  {id:'c_invest',label:'Retirement / investments',cat:'Investments & savings'},
+  {id:'c_emerg',label:'Emergency fund',cat:'Investments & savings'},
+  {id:'c_give',label:'Giving / charity',cat:'Investments & savings'},
+  {id:'c_sub',label:'Subscriptions & tech',cat:'Everything else'},
+  {id:'c_kids',label:'Kids & family',cat:'Everything else'},
+  {id:'c_misc',label:'Anything else',cat:'Everything else'},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const DEFAULT_CAT=[
+  {id:'c1',name:'Morning meditation',dur:30,dz:4,work:false},
+  {id:'c2',name:'Exercise',dur:60,dz:5,work:false},
+  {id:'c3',name:'Journaling',dur:30,dz:3,work:false},
+  {id:'c4',name:'Deep focus work',dur:120,dz:2,work:true},
+  {id:'c5',name:'Lunch & walk',dur:60,dz:3,work:false},
+  {id:'c6',name:'Admin & email',dur:60,dz:-2,work:true},
+  {id:'c7',name:'Evening wind-down',dur:60,dz:3,work:false},
+];
+let state={catalogue:[],schedules:{free:[],work:[]},startTimes:{free:360,work:360},schedMode:'free',nid:200};
+let costs={};COST_FIELDS.forEach(f=>costs[f.id]=0);
+let dzVal=1,dzOpen=false,selDurVal=60,isWork=false,catFilter='all',dragSrc=null,saveTimer=null,costsTimer=null;
+
+// ── STORAGE ───────────────────────────────────────────────────────────────────
+async function loadAll(){
+  try{
+    if(window.storage&&typeof window.storage.get==='function'){
+      const r1=await window.storage.get('ild-v3').catch(()=>null);
+      if(r1&&r1.value){const l=JSON.parse(r1.value);state={...state,...l,schedules:{free:[],work:[],...(l.schedules||{})},startTimes:{free:360,work:360,...(l.startTimes||{})}};}
+      const r2=await window.storage.get('ild-10yr').catch(()=>null);
+      if(r2&&r2.value)Object.assign(costs,JSON.parse(r2.value));
+    }
+  }catch(e){}
+}
+async function saveState(){
+  try{
+    if(!window.storage)return;
+    const d=document.getElementById('saveDot');if(d)d.className='save-dot saving';
+    await window.storage.set('ild-v3',JSON.stringify(state));
+    if(d){d.className='save-dot saved';setTimeout(()=>{if(d)d.className='save-dot';},1500);}
+  }catch(e){}
+}
+async function saveCosts(){
+  try{
+    if(!window.storage)return;
+    const d=document.getElementById('saveDot2');if(d)d.className='save-dot saving';
+    await window.storage.set('ild-10yr',JSON.stringify(costs));
+    if(d){d.className='save-dot saved';setTimeout(()=>{if(d)d.className='save-dot';},1500);}
+  }catch(e){}
+}
+function debounceSave(){if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(saveState,600);}
+function debounceCosts(){if(costsTimer)clearTimeout(costsTimer);costsTimer=setTimeout(saveCosts,600);}
+
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
+function updateClock(){
+  const n=new Date(),h=n.getHours()%12||12,m=n.getMinutes().toString().padStart(2,'0');
+  const el=document.getElementById('st-time');if(el)el.textContent=`${h}:${m}`;
+}
+setInterval(updateClock,30000);updateClock();
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+const INTRO_VIEWS=['v-loading','v-welcome','v-bio','v-modules'];
+const M1_VIEWS=['m1-schedule','m1-new','m1-cat','m1-guide'];
+const M2_VIEWS=['m2-overview','m2-costs'];
+const ALL_VIEWS=[...INTRO_VIEWS,...M1_VIEWS,...M2_VIEWS];
+
+function setStatusbar(dark){
+  const sb=document.getElementById('statusbar');
+  const st=document.getElementById('st-time');
+  if(!sb||!st)return;
+  sb.className='statusbar '+(dark?'dark':'light');
+  st.className='st '+(dark?'dark':'light');
+  const icons=sb.querySelectorAll('svg rect,svg path,svg circle');
+  icons.forEach(el=>{
+    if(el.getAttribute('fill')&&el.getAttribute('fill')!=='none')el.setAttribute('fill',dark?'white':'#1C1C18');
+    if(el.getAttribute('stroke')&&el.getAttribute('stroke')!=='none')el.setAttribute('stroke',dark?'white':'#1C1C18');
+  });
+}
+
+function hideAllViews(){ALL_VIEWS.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('on');});}
+function hideAllNavs(){['bnav-m1','bnav-m2'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('visible');});}
+
+function nav(id){
+  hideAllViews();hideAllNavs();
+  document.getElementById(id).classList.add('on');
+  setStatusbar(true);
+}
+
+function enterSched(){showM1('m1-schedule');activateM1Nav('bn-sched');}
+function enter10yr(){showM2('m2-overview');activateM2Nav('bn-overview');}
+
+function showM1(id){
+  hideAllViews();hideAllNavs();
+  document.getElementById(id).classList.add('on');
+  document.getElementById('bnav-m1').classList.add('visible');
+  setStatusbar(false);
+  if(id==='m1-schedule')renderSchedule();
+  if(id==='m1-cat')renderCat();
+}
+function showM2(id){
+  hideAllViews();hideAllNavs();
+  document.getElementById(id).classList.add('on');
+  document.getElementById('bnav-m2').classList.add('visible');
+  setStatusbar(id==='m2-overview');
+  if(id==='m2-overview')updateOverviewCard();
+}
+
+function activateM1Nav(activeId){
+  ['bn-sched','bn-new','bn-cat','bn-guide'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.classList.remove('on');
+    const lbl=el.querySelector('.bn-lbl');if(lbl){lbl.style.color='';lbl.style.fontWeight='';}
+    el.querySelectorAll('svg path,svg rect,svg circle').forEach(p=>{
+      if(p.getAttribute('stroke')&&p.getAttribute('stroke')!=='none')p.setAttribute('stroke','#8A8578');
+      if(p.getAttribute('fill')&&p.getAttribute('fill')!=='none'&&p.getAttribute('fill')!=='white')p.setAttribute('fill','#8A8578');
+    });
+  });
+  const a=document.getElementById(activeId);if(!a)return;
+  a.classList.add('on');
+  const lbl=a.querySelector('.bn-lbl');if(lbl){lbl.style.color='#5C7A55';lbl.style.fontWeight='500';}
+  a.querySelectorAll('svg path,svg rect,svg circle').forEach(p=>{
+    if(p.getAttribute('stroke')&&p.getAttribute('stroke')!=='none')p.setAttribute('stroke','#5C7A55');
+    if(p.getAttribute('fill')&&p.getAttribute('fill')!=='none'&&p.getAttribute('fill')!=='white')p.setAttribute('fill','#5C7A55');
+  });
+}
+function activateM2Nav(activeId){
+  ['bn-overview','bn-costs','bn-allmod'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.classList.remove('on');
+    const lbl=el.querySelector('.bn-lbl');if(lbl){lbl.style.color='';lbl.style.fontWeight='';}
+    el.querySelectorAll('svg path,svg rect').forEach(p=>{if(p.getAttribute('stroke'))p.setAttribute('stroke','#8A8578');});
+  });
+  const a=document.getElementById(activeId);if(!a)return;
+  a.classList.add('on');
+  const lbl=a.querySelector('.bn-lbl');if(lbl){lbl.style.color='#5C7A55';lbl.style.fontWeight='500';}
+  a.querySelectorAll('svg path,svg rect').forEach(p=>{if(p.getAttribute('stroke'))p.setAttribute('stroke','#5C7A55');});
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function getActs(){return state.schedules[state.schedMode];}
+function getStart(){return state.startTimes[state.schedMode]||360;}
+function fmtD(m){if(m<60)return m+'m';const h=Math.floor(m/60),r=m%60;return r?`${h}h ${r}m`:`${h}h`;}
+function fmtHours(m){if(!m)return'0h';const h=Math.floor(m/60),r=m%60;if(!r)return`${h}h`;if(r===30)return`${h}.5h`;return`${h}h ${r}m`;}
+function fmtT(s,o){const t=(s+o)%1440,h=Math.floor(t/60),m=t%60,ap=h<12?'am':'pm',h12=h%12||12;return m===0?`${h12}${ap}`:`${h12}:${m.toString().padStart(2,'0')}${ap}`;}
+function fmtMoney(n){if(!n||isNaN(n)||n===0)return'$0';return'$'+Math.round(n).toLocaleString();}
+function showToast(id,msg,delay=2000){const t=document.getElementById(id);if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),delay);}
+
+// ── START TIME ────────────────────────────────────────────────────────────────
+function buildTimes(){
+  const s=document.getElementById('startTime');if(!s)return;s.innerHTML='';
+  for(let h=0;h<24;h++)for(let m=0;m<60;m+=30){
+    const t=h*60+m,ap=h<12?'am':'pm',h12=h%12||12;
+    const o=document.createElement('option');
+    o.value=t;o.textContent=m===0?`${h12}:00 ${ap}`:`${h12}:30 ${ap}`;
+    s.appendChild(o);
+  }
+  s.value=getStart();
+}
+function onStartChange(){state.startTimes[state.schedMode]=parseInt(document.getElementById('startTime').value)||360;debounceSave();renderSchedule();}
+
+// ── SCHEDULE MODE ──────────────────────────────────────────────────────────────
+function setSchedMode(m){
+  state.schedMode=m;
+  document.getElementById('sf').className='seg'+(m==='free'?' on':'');
+  document.getElementById('sw').className='seg'+(m==='work'?' on':'');
+  const s=document.getElementById('startTime');if(s)s.value=getStart();
+  debounceSave();renderSchedule();
+}
+
+// ── LIVE TRACKER ──────────────────────────────────────────────────────────────
+function renderLiveTracker(){
+  const acts=getActs();
+  const wrap=document.getElementById('live-tracker-wrap');if(!wrap)return;
+  if(!acts.length){wrap.innerHTML='';return;}
+  const done=acts.filter(a=>a.done);
+  const cum=done.reduce((s,a)=>s+a.dz,0);
+  const inZ=cum>=-2&&cum<=2;
+  const sc=inZ?'#5C7A55':'#C0392B';
+  const lbl=cum>0?'+'+cum:String(cum);
+  const clamp=Math.max(-10,Math.min(10,cum));
+  const pct=Math.abs(clamp)/10*50;
+  const isPos=clamp>=0;
+  wrap.innerHTML=`<div class="live-tracker">
+    <div class="lt-top">
+      <div><div class="lt-label">Live DZ Score</div><div style="font-size:11px;color:var(--ink3);margin-top:2px;">${done.length} of ${acts.length} completed</div></div>
+      <div style="text-align:right;"><div class="lt-score" style="color:${sc};">${lbl}</div><div class="lt-status" style="color:${sc};">${done.length===0?'Not started':inZ?'In the zone':'Out of zone'}</div></div>
+    </div>
+    <div class="lt-track"><div class="lt-fill" style="width:${pct}%;${isPos?'left:50%':'right:50%;left:auto'};background:${sc};"></div><div class="lt-center" style="background:${sc};"></div></div>
+    <div class="lt-axis"><span class="lt-axis-lbl">-10</span><span class="lt-axis-lbl" style="color:${sc};font-weight:500;">${lbl}</span><span class="lt-axis-lbl">+10</span></div>
+    <div style="height:1px;background:var(--s3);margin-bottom:10px;"></div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+      ${acts.map((a,i)=>{let r=0;for(let j=0;j<=i;j++){if(acts[j].done)r+=acts[j].dz;}const iz=r>=-2&&r<=2;const bg=a.done?(iz?'#EAF3DE':'#FDF0EF'):'var(--s2)';const col=a.done?(iz?'#27500A':'#C0392B'):'var(--ink3)';const v=a.done?(r>0?'+'+r:String(r)):'·';return`<div style="background:${bg};color:${col};border-radius:6px;padding:3px 7px;font-size:11px;font-weight:${a.done?'600':'400'};font-family:var(--serif);">${v}</div>`;}).join('')}
+    </div>
+  </div>`;
+}
+
+// ── SCHEDULE RENDER ───────────────────────────────────────────────────────────
+function toggleDone(id){const a=getActs().find(x=>x.id===id);if(a){a.done=!a.done;debounceSave();}renderLiveTracker();renderCards();}
+function moveAct(i,dir){const acts=getActs();const j=i+dir;if(j<0||j>=acts.length)return;[acts[i],acts[j]]=[acts[j],acts[i]];debounceSave();renderSchedule();}
+
+function renderCards(){
+  const acts=getActs();const start=getStart();let cur=0,html='';
+  for(let i=0;i<acts.length;i++){
+    const a=acts[i];const st=cur;cur+=a.dur;const last=i===acts.length-1;
+    const dm=getDZ(a.dz);let r=0;for(let j=0;j<=i;j++){if(acts[j].done)r+=acts[j].dz;}
+    const iz=r>=-2&&r<=2;
+    const rc=a.done?(iz?'#27500A':'#C0392B'):'var(--ink3)';
+    const rb=a.done?(iz?'#EAF3DE':'#FDF0EF'):'var(--s2)';
+    const rl=a.done?(r>0?'+'+r:String(r)):'—';
+    html+=`<div class="tl-entry" id="row-${a.id}" draggable="true">
+      <div class="tl-time">${fmtT(start,st)}</div>
+      <div class="tl-spine"><div class="tl-dot ${a.done?'done':'pending'}"></div>${last?'':'<div class="tl-line '+(a.done?'done':'pending')+'"></div>'}</div>
+      <div style="flex:1;padding-bottom:${last?0:4}px;">
+        <div class="tl-card${a.done?' done':''}${a.work?' work-card':''}">
+          <div class="card-inner">
+            <div class="move-col">
+              <div class="mbtn${i===0?' off':''}" id="up-${a.id}"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 8l4-4 4 4" stroke="#4A4840" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="grip"><svg width="10" height="14" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2.5" r="1.3" fill="#8A8578"/><circle cx="7" cy="2.5" r="1.3" fill="#8A8578"/><circle cx="3" cy="7" r="1.3" fill="#8A8578"/><circle cx="7" cy="7" r="1.3" fill="#8A8578"/><circle cx="3" cy="11.5" r="1.3" fill="#8A8578"/><circle cx="7" cy="11.5" r="1.3" fill="#8A8578"/></svg></div>
+              <div class="mbtn${last?' off':''}" id="dn-${a.id}"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="#4A4840" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="act-name${a.done?' done':''}">${a.name}</span>
+                <div class="card-right">${a.work?'<span class="work-pill">Work</span>':''}<span class="dur-pill">${fmtD(a.dur)}</span><div class="del-btn" id="del-${a.id}"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="#C0392B" stroke-width="1.5" stroke-linecap="round"/></svg></div></div>
+              </div>
+              <div class="card-footer">
+                <span class="dz-tag" style="background:${dm.tagBg};color:${dm.tagTxt};"><span class="dz-dot" style="background:${dm.sw};"></span>DZ ${dm.lbl}</span>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span style="background:${rb};color:${rc};border-radius:20px;padding:3px 9px;font-size:11px;font-weight:600;font-family:var(--serif);">${rl}</span>
+                  <div class="done-btn${a.done?' completed':''}" id="donebtn-${a.id}">${a.done?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Done':'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="#5C7A55" stroke-width="1.3"/></svg> Mark done'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+  html+=`<div class="tend"><span class="tend-lbl">Ends at ${fmtT(start,cur)}</span></div>`;
+  document.getElementById('tl').innerHTML=html;
+  const snap=getActs();
+  for(let i=0;i<snap.length;i++){
+    const a=snap[i];const idx=i;
+    const upEl=document.getElementById('up-'+a.id);
+    const dnEl=document.getElementById('dn-'+a.id);
+    const delEl=document.getElementById('del-'+a.id);
+    const doneEl=document.getElementById('donebtn-'+a.id);
+    const row=document.getElementById('row-'+a.id);
+    if(upEl&&!upEl.classList.contains('off'))upEl.addEventListener('click',()=>moveAct(idx,-1));
+    if(dnEl&&!dnEl.classList.contains('off'))dnEl.addEventListener('click',()=>moveAct(idx,1));
+    if(delEl)delEl.addEventListener('click',()=>{snap.splice(idx,1);debounceSave();renderSchedule();});
+    if(doneEl&&!a.done)doneEl.addEventListener('click',()=>toggleDone(a.id));
+    if(row){
+      row.addEventListener('dragstart',e=>{dragSrc=idx;e.dataTransfer.effectAllowed='move';setTimeout(()=>row.style.opacity='0.4',0);});
+      row.addEventListener('dragend',()=>{row.style.opacity='1';document.querySelectorAll('.tl-entry').forEach(r=>r.classList.remove('drag-over'));});
+      row.addEventListener('dragover',e=>{e.preventDefault();if(dragSrc!==null&&dragSrc!==idx)row.classList.add('drag-over');});
+      row.addEventListener('dragleave',()=>row.classList.remove('drag-over'));
+      row.addEventListener('drop',e=>{e.preventDefault();row.classList.remove('drag-over');if(dragSrc===null||dragSrc===idx)return;const moved=snap.splice(dragSrc,1)[0];snap.splice(idx,0,moved);dragSrc=null;debounceSave();renderSchedule();});
+    }
+  }
+}
+
+function renderSchedule(){
+  const acts=getActs();
+  const td=document.getElementById('total-disp');
+  if(!acts.length){
+    document.getElementById('tl').innerHTML=`<div class="sched-empty"><div class="sched-empty-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="7" height="7" rx="1.5" stroke="#8A8578" stroke-width="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5" stroke="#8A8578" stroke-width="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5" stroke="#8A8578" stroke-width="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5" stroke="#8A8578" stroke-width="1.5"/></svg></div><div class="sched-empty-title">Your schedule is empty</div><div class="sched-empty-sub">Go to your Dope Zone Catalogue and tap the schedule buttons to add activities here.</div><button class="go-cat-btn" onclick="showM1('m1-cat');activateM1Nav('bn-cat')"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="white" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="white" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="white" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="white" stroke-width="1.2"/></svg>Browse Catalogue</button></div>`;
+    if(td)td.innerHTML='';
+    const wrap=document.getElementById('live-tracker-wrap');if(wrap)wrap.innerHTML='';
+    return;
+  }
+  const total=acts.reduce((s,a)=>s+a.dur,0);
+  if(td)td.innerHTML=`Total: <strong style="color:var(--ink);font-size:13px;">${fmtD(total)}</strong>`;
+  renderLiveTracker();
+  renderCards();
+}
+
+// ── ADD FORM ──────────────────────────────────────────────────────────────────
+function toggleWorkType(){isWork=!isWork;document.getElementById('workToggle').className='toggle-track'+(isWork?' on':'');document.getElementById('workTypeLabel').textContent=isWork?'Work activity':'Personal activity';}
+function buildDZList(){document.getElementById('dzList').innerHTML=DZ.map(d=>`<div class="dz-opt${d.v===dzVal?' selected':''}" onclick="pickDZ(${d.v})"><div class="dz-osw" style="background:${d.sw};"></div><span class="dz-ov" style="color:${d.sw};">${d.lbl}</span>${d.v===dzVal?`<svg class="dz-och" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-6" stroke="${d.sw}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}</div>`).join('');}
+function updateTrigger(){const d=getDZ(dzVal);document.getElementById('dzSwatch').style.background=d.sw;const v=document.getElementById('dzValDisp');v.textContent=d.lbl;v.style.color=d.sw;}
+function toggleDZ(){dzOpen=!dzOpen;document.getElementById('dzList').className='dz-list'+(dzOpen?' open':'');document.getElementById('dzTrig').className='dz-trigger'+(dzOpen?' open':'');document.getElementById('dzCh').className='dz-ch'+(dzOpen?' open':'');if(dzOpen)buildDZList();}
+function pickDZ(v){dzVal=v;dzOpen=false;document.getElementById('dzList').className='dz-list';document.getElementById('dzTrig').className='dz-trigger';document.getElementById('dzCh').className='dz-ch';updateTrigger();}
+function selDur(el,v){selDurVal=v;document.querySelectorAll('.db').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
+
+function addNewAct(dest){
+  const name=document.getElementById('newName').value.trim();
+  if(!name){showToast('toast2','Enter an activity name');return;}
+  const already=state.catalogue.some(c=>c.name.toLowerCase()===name.toLowerCase());
+  if(!already)state.catalogue.push({id:'c'+state.nid,name,dur:selDurVal,dz:dzVal,work:isWork});
+  if(dest)state.schedules[dest].push({id:state.nid++,name,dur:selDurVal,dz:dzVal,done:false,work:isWork});
+  else state.nid++;
+  debounceSave();
+  document.getElementById('newName').value='';
+  const msg=dest?`Saved to catalogue & ${dest==='free'?'Without Work':'With Work'} schedule`:'Saved to catalogue';
+  showToast('toast2',msg);
+  setTimeout(()=>{if(dest){state.schedMode=dest;showM1('m1-schedule');activateM1Nav('bn-sched');}else{showM1('m1-cat');activateM1Nav('bn-cat');}},900);
+}
+
+// ── CATALOGUE ─────────────────────────────────────────────────────────────────
+function addFromCatalogue(catId,dest){
+  const src=state.catalogue.find(c=>c.id===catId);if(!src)return;
+  state.schedules[dest].push({id:state.nid++,name:src.name,dur:src.dur,dz:src.dz,done:false,work:src.work});
+  debounceSave();
+  const t=document.getElementById('catToast');
+  t.textContent=`"${src.name}" added to ${dest==='free'?'Without Work':'With Work'}`;
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+function renderTotalsBanner(){
+  const wrap=document.getElementById('totals-banner-wrap');if(!wrap)return;
+  const personal=state.catalogue.filter(a=>!a.work);
+  const work=state.catalogue.filter(a=>a.work);
+  const pm=personal.reduce((s,a)=>s+a.dur,0);
+  const wm=work.reduce((s,a)=>s+a.dur,0);
+  if(!state.catalogue.length){wrap.innerHTML='';return;}
+  wrap.innerHTML=`<div class="totals-banner">
+    <div class="total-cell"><span class="total-cell-label" style="color:var(--g2);">Personal</span><span class="total-cell-val" style="color:var(--g2);">${fmtHours(pm)}</span><span class="total-cell-sub">${personal.length} activities</span></div>
+    <div class="total-cell"><span class="total-cell-label" style="color:var(--amber);">Work</span><span class="total-cell-val" style="color:var(--amber);">${fmtHours(wm)}</span><span class="total-cell-sub">${work.length} activities</span></div>
+    <div class="total-cell" style="grid-column:1/-1;padding-top:10px;border-top:0.5px solid var(--s3);margin-top:2px;"><span class="total-cell-label">Combined</span><div style="display:flex;align-items:baseline;gap:10px;"><span class="total-cell-val" style="color:var(--ink);">${fmtHours(pm+wm)}</span><span class="total-cell-sub">${state.catalogue.length} activities</span></div></div>
+  </div>`;
+}
+
+function catSection(list,isWork){
+  const filtered=catFilter==='positive'?list.filter(a=>a.dz>0):catFilter==='negative'?list.filter(a=>a.dz<0):list;
+  const sorted=[...filtered].sort((a,b)=>b.dz-a.dz);
+  const title=isWork?'Work':'Personal';
+  const iconBg=isWork?'#FAEEDA':'#EAF0E9';const iconStroke=isWork?'#BA7517':'#5C7A55';
+  const icon=isWork?`<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="12" height="9" rx="1.5" stroke="${iconStroke}" stroke-width="1.3"/><path d="M4 4V3a3 3 0 016 0v1" stroke="${iconStroke}" stroke-width="1.3" stroke-linecap="round"/></svg>`:`<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2a2.5 2.5 0 100 5 2.5 2.5 0 000-5z" stroke="${iconStroke}" stroke-width="1.3"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="${iconStroke}" stroke-width="1.3" stroke-linecap="round"/></svg>`;
+  const st=list.reduce((s,a)=>s+a.dur,0);
+  let html=`<div class="cat-sec-hdr"><div class="cat-sec-icon" style="background:${iconBg};">${icon}</div><span class="cat-sec-title">${title}</span><div class="cat-sec-meta">${list.length>0?`<div class="hours-tile ${isWork?'work':'personal'}"><span class="hours-tile-val">${fmtHours(st)}</span><span class="hours-tile-lbl">total</span></div>`:''}<span style="font-size:11px;color:var(--ink3);">${list.length} act${list.length===1?'':'s'}</span></div></div><div class="cat-sec-rule"></div>`;
+  if(!sorted.length){html+=`<div class="empty-half">No ${catFilter==='all'?'':catFilter+' '}${title.toLowerCase()} activities yet</div>`;}
+  else{html+=`<div class="cat-grid">${sorted.map(a=>{const dm=getDZ(a.dz);return`<div class="cat-item${isWork?' work':''}"><div class="cat-item-name">${a.name}</div><div class="cat-item-meta"><span style="font-size:11px;color:var(--ink3);">${fmtD(a.dur)}</span><span class="dz-tag" style="background:${dm.tagBg};color:${dm.tagTxt};padding:2px 8px;font-size:11px;"><span class="dz-dot" style="background:${dm.sw};width:6px;height:6px;"></span>DZ ${dm.lbl}</span></div><div class="dest-row"><button class="dest-btn free" data-id="${a.id}" data-dest="free"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3.5" stroke="#5C7A55" stroke-width="1.2"/><path d="M5 3.5v1.5l1 1" stroke="#5C7A55" stroke-width="1.2" stroke-linecap="round"/></svg>No work</button><button class="dest-btn withwork" data-id="${a.id}" data-dest="work"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="3.5" width="8" height="5.5" rx="1" stroke="#BA7517" stroke-width="1.2"/><path d="M3 3.5V3a2 2 0 014 0v.5" stroke="#BA7517" stroke-width="1.2" stroke-linecap="round"/></svg>With work</button></div></div>`;}).join('')}</div>`;}
+  return html;
+}
+
+function setFilter(el,f){catFilter=f;document.querySelectorAll('.cf').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderCat();}
+
+function renderCat(){
+  renderTotalsBanner();
+  const el=document.getElementById('catContent');
+  const cc=document.getElementById('cat-count');if(cc)cc.textContent=state.catalogue.length+' activities';
+  if(!state.catalogue.length){
+    el.innerHTML=`<div style="padding:40px 0;text-align:center;"><div style="font-family:var(--serif);font-size:17px;color:var(--ink);margin-bottom:6px;">Catalogue is empty</div><div style="font-size:13px;color:var(--ink3);">Tap + to create your first activity.</div></div>`;
+    return;
+  }
+  el.innerHTML=catSection(state.catalogue.filter(a=>!a.work),false)+'<div style="height:8px;"></div>'+catSection(state.catalogue.filter(a=>a.work),true);
+  el.querySelectorAll('.dest-btn').forEach(btn=>{
+    btn.addEventListener('click',e=>{e.stopPropagation();addFromCatalogue(btn.dataset.id,btn.dataset.dest);});
+  });
+}
+
+// ── 10 YEAR COSTS ─────────────────────────────────────────────────────────────
+function buildCostsForm(){
+  const el=document.getElementById('costsForm');if(!el)return;
+  let html='';
+  // add summary at top
+  html+=`<div id="dream-summary-wrap"></div>`;
+  let lastCat='';
+  COST_FIELDS.forEach(f=>{
+    if(f.cat!==lastCat){
+      if(lastCat)html+='<div style="height:8px;"></div>';
+      html+=`<div class="cost-section-hdr">${f.cat}</div>`;
+      lastCat=f.cat;
+    }
+    const val=costs[f.id]||0;
+    html+=`<div class="cost-row"><span class="cost-label">${f.label}</span><div class="cost-input-wrap"><span class="cost-dollar">$</span><input type="number" class="cost-input${val>0?' filled':''}" id="${f.id}" value="${val||''}" placeholder="0" min="0" inputmode="numeric"></div></div>`;
+  });
+  el.innerHTML=html;
+  COST_FIELDS.forEach(f=>{
+    const inp=document.getElementById(f.id);
+    if(!inp)return;
+    inp.addEventListener('input',()=>{
+      const v=parseFloat(inp.value)||0;
+      costs[f.id]=v;
+      inp.className='cost-input'+(v>0?' filled':'');
+      debounceCosts();
+      updateDreamSummary();
+      updateOverviewCard();
+    });
+  });
+  updateDreamSummary();
+}
+
+function totalCosts(){return COST_FIELDS.reduce((s,f)=>s+(costs[f.id]||0),0);}
+function filledCount(){return COST_FIELDS.filter(f=>(costs[f.id]||0)>0).length;}
+
+function updateDreamSummary(){
+  const wrap=document.getElementById('dream-summary-wrap');if(!wrap)return;
+  const annual=totalCosts();
+  if(annual===0){wrap.innerHTML='';return;}
+  const mo=annual/12;const wk=annual/52;const dy=annual/365;
+  wrap.innerHTML=`<div class="dream-summary">
+    <div class="ds-label">Dream annual income needed</div>
+    <div class="ds-val">${fmtMoney(annual)}</div>
+    <div class="ds-grid">
+      <div class="ds-cell"><div class="ds-cell-lbl">Per month</div><div class="ds-cell-val">${fmtMoney(mo)}</div></div>
+      <div class="ds-cell"><div class="ds-cell-lbl">Per week</div><div class="ds-cell-val">${fmtMoney(wk)}</div></div>
+      <div class="ds-cell"><div class="ds-cell-lbl">Per day</div><div class="ds-cell-val">${fmtMoney(dy)}</div></div>
+      <div class="ds-cell"><div class="ds-cell-lbl">Fields filled</div><div class="ds-cell-val">${filledCount()} / ${COST_FIELDS.length}</div></div>
+    </div>
+  </div><div style="height:20px;"></div>`;
+}
+
+function updateOverviewCard(){
+  const filled=filledCount();
+  const annual=totalCosts();
+  const statusEl=document.getElementById('ov-costs-status');
+  const totalEl=document.getElementById('ov-costs-total');
+  const progEl=document.getElementById('ov-costs-prog');
+  const fillEl=document.getElementById('ov-prog-fill');
+  const lblEl=document.getElementById('ov-prog-lbl');
+  if(!statusEl)return;
+  if(filled>0){
+    statusEl.innerHTML=`<div class="ov-check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+    if(totalEl){totalEl.style.display='block';totalEl.textContent=fmtMoney(annual)+' / yr';}
+    if(progEl){progEl.style.display='block';}
+    if(fillEl)fillEl.style.width=Math.round(filled/COST_FIELDS.length*100)+'%';
+    if(lblEl)lblEl.textContent=filled+' of '+COST_FIELDS.length+' filled';
+  } else {
+    statusEl.innerHTML='<div class="ov-empty"></div>';
+    if(totalEl)totalEl.style.display='none';
+    if(progEl)progEl.style.display='none';
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+async function init(){
+  await loadAll();
+  if(state.catalogue.length===0){
+    state.catalogue=JSON.parse(JSON.stringify(DEFAULT_CAT));
+    if(window.storage)saveState().catch(()=>{});
+  }
+  buildTimes();
+  updateTrigger();
+  document.getElementById('sf').className='seg'+(state.schedMode==='free'?' on':'');
+  document.getElementById('sw').className='seg'+(state.schedMode==='work'?' on':'');
+  buildCostsForm();
+  updateOverviewCard();
+  // show welcome
+  hideAllViews();hideAllNavs();
+  document.getElementById('v-welcome').classList.add('on');
+  setStatusbar(true);
+}
+
+init();
+
+// ── SERVICE WORKER ────────────────────────────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});
+}
+</script>
+</body>
+</html>
