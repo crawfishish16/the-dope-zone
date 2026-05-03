@@ -871,7 +871,8 @@ async function doLogin(){
   btn.className='auth-btn loading';btn.textContent='Signing in...';
   const{data,error}=await supa.auth.signInWithPassword({email,password});
   btn.className='auth-btn';btn.textContent='Sign in';
-  if(error){err.textContent=error.message;err.className='auth-error show';return;}
+  if(error){err.textContent='Error: '+error.message+' ('+error.status+')';err.className='auth-error show';return;}
+  if(!data||!data.user){err.textContent='No user returned. Data: '+JSON.stringify(data);err.className='auth-error show';return;}
   if(data&&data.user){
     currentUser=data.user;
     await loadAll();
