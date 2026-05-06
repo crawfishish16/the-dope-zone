@@ -12,9 +12,6 @@
 <title>The Dope Zone</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -800,19 +797,8 @@ body{font-family:var(--sans);display:flex;flex-direction:column;}
 </div><!-- end #app -->
 
 <script>
-// ── FIREBASE ──────────────────────────────────────────────────────────────────
-const firebaseConfig={
-  apiKey:'AIzaSyCmXPCDzNQNXfbVKTVCZaqqutjrTOVyIE4',
-  authDomain:'the-dope-zone.firebaseapp.com',
-  projectId:'the-dope-zone',
-  storageBucket:'the-dope-zone.firebasestorage.app',
-  messagingSenderId:'817355203333',
-  appId:'1:817355203333:web:e7d8c5bc17818acd46cd6c'
-};
-firebase.initializeApp(firebaseConfig);
-const fbAuth=firebase.auth();
-const fbDb=firebase.firestore();
 let currentUser=null;
+let fbAuth=null,fbDb=null;
 
 // ── DZ DATA ──────────────────────────────────────────────────────────────────
 const DZ=[
@@ -1516,6 +1502,32 @@ document.addEventListener('keydown',e=>{
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});
 }
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  try{
+    firebase.initializeApp({
+      apiKey:'AIzaSyCmXPCDzNQNXfbVKTVCZaqqutjrTOVyIE4',
+      authDomain:'the-dope-zone.firebaseapp.com',
+      projectId:'the-dope-zone',
+      storageBucket:'the-dope-zone.firebasestorage.app',
+      messagingSenderId:'817355203333',
+      appId:'1:817355203333:web:e7d8c5bc17818acd46cd6c'
+    });
+    window.fbAuth=firebase.auth();
+    window.fbDb=firebase.firestore();
+    init();
+  }catch(e){
+    console.error('Firebase init failed:',e);
+    document.getElementById('v-loading').style.display='none';
+    showAuth('v-login');
+    const s=document.getElementById('fb-status');
+    if(s)s.textContent='Setup error: '+e.message;
+  }
+});
 </script>
 </body>
 </html>
