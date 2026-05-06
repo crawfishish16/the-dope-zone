@@ -864,10 +864,6 @@ let state={catalogue:[],schedules:{free:[],work:[]},startTimes:{free:360,work:36
 let costs={};COST_FIELDS.forEach(f=>costs[f.id]=0);
 let dzVal=1,dzOpen=false,selDurVal=60,isWork=false,catFilter='all',dragSrc=null,saveTimer=null,costsTimer=null;
 
-// ── SUPABASE ──────────────────────────────────────────────────────────────────
-
-
-let currentUser=null;
 
 // ── AUTH FUNCTIONS ────────────────────────────────────────────────────────────
 function showAuth(id){
