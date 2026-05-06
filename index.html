@@ -12,7 +12,7 @@
 <title>The Dope Zone</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -1458,6 +1458,16 @@ async function init(){
   // Show loading while checking auth
   hideAllViews();hideAllNavs();
   document.getElementById('v-loading').classList.add('on');
+
+  // Check Supabase loaded
+  if(typeof supabase==='undefined'||!supa){
+    console.error('Supabase not loaded');
+    hideAllViews();hideAllNavs();
+    showAuth('v-login');
+    const err=document.getElementById('login-error');
+    if(err){err.textContent='Connection error. Please refresh and try again.';err.className='auth-error show';}
+    return;
+  }
 
   // Listen for auth state changes
   supa.auth.onAuthStateChange(async(event,session)=>{
