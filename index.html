@@ -851,9 +851,9 @@ let costs={};COST_FIELDS.forEach(f=>costs[f.id]=0);
 let dzVal=1,dzOpen=false,selDurVal=60,isWork=false,catFilter='all',dragSrc=null,saveTimer=null,costsTimer=null;
 
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
-const SUPA_URL='https://rsaanpguoqoolwwkvvfl.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzYWFucGd1b3Fvb2x3d2t2dmZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NDQyNTIsImV4cCI6MjA5MzMyMDI1Mn0.H7iRGXu2wWX2zHzfdo194hHKVY4lNPsITyn9vYPcqUA';
-const supa=supabase.createClient(SUPA_URL,SUPA_KEY);
+// Supabase removed - using Firebase
+
+
 let currentUser=null;
 
 // ── AUTH FUNCTIONS ────────────────────────────────────────────────────────────
@@ -873,7 +873,7 @@ async function doLogin(){
   if(!email||!password){err.textContent='Please enter your email and password.';err.className='auth-error show';return;}
   btn.className='auth-btn loading';btn.textContent='Signing in...';
   try{
-    const{data,error}=await supa.auth.signInWithPassword({email,password});
+    const cred2=await fbAuth.signInWithEmailAndPassword(email,password);const data={user:cred2.user};const error=null;
     btn.className='auth-btn';btn.textContent='Sign in';
     if(error){err.textContent=error.message;err.className='auth-error show';return;}
     if(data&&data.user){
@@ -916,7 +916,7 @@ async function doSignup(){
   if(!email||!password){err.textContent='Please enter your email and password.';err.className='auth-error show';return;}
   if(password.length<6){err.textContent='Password must be at least 6 characters.';err.className='auth-error show';return;}
   btn.className='auth-btn loading';btn.textContent='Creating account...';
-  const{error}=await supa.auth.signUp({email,password});
+  await fbAuth.createUserWithEmailAndPassword(email,password);const error=null;
   btn.className='auth-btn';btn.textContent='Create account';
   if(error){err.textContent=error.message;err.className='auth-error show';return;}
   showAuth('v-login');
@@ -932,13 +932,13 @@ async function doReset(){
   err.className='auth-error';succ.className='auth-success';
   if(!email){err.textContent='Please enter your email.';err.className='auth-error show';return;}
   btn.className='auth-btn loading';btn.textContent='Sending...';
-  await supa.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
+  await fbAuth.sendPasswordResetEmail(email);
   btn.className='auth-btn';btn.textContent='Send reset link';
   succ.className='auth-success show';
 }
 
 async function doSignOut(){
-  await supa.auth.signOut();
+  await fbAuth.signOut();
   currentUser=null;
   state={catalogue:[],schedules:{free:[],work:[]},startTimes:{free:360,work:360},schedMode:'free',nid:200};
   costs={};COST_FIELDS.forEach(f=>costs[f.id]=0);
