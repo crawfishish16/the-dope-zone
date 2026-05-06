@@ -800,6 +800,20 @@ body{font-family:var(--sans);display:flex;flex-direction:column;}
 </div><!-- end #app -->
 
 <script>
+// ── FIREBASE ──────────────────────────────────────────────────────────────────
+const firebaseConfig={
+  apiKey:'AIzaSyCmXPCDzNQNXfbVKTVCZaqqutjrTOVyIE4',
+  authDomain:'the-dope-zone.firebaseapp.com',
+  projectId:'the-dope-zone',
+  storageBucket:'the-dope-zone.firebasestorage.app',
+  messagingSenderId:'817355203333',
+  appId:'1:817355203333:web:e7d8c5bc17818acd46cd6c'
+};
+firebase.initializeApp(firebaseConfig);
+const fbAuth=firebase.auth();
+const fbDb=firebase.firestore();
+let currentUser=null;
+
 // ── DZ DATA ──────────────────────────────────────────────────────────────────
 const DZ=[
   {v:-5,lbl:'-5',sw:'#712B13',tagBg:'#FAECE7',tagTxt:'#712B13'},
@@ -851,7 +865,6 @@ let costs={};COST_FIELDS.forEach(f=>costs[f.id]=0);
 let dzVal=1,dzOpen=false,selDurVal=60,isWork=false,catFilter='all',dragSrc=null,saveTimer=null,costsTimer=null;
 
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
-// Supabase removed - using Firebase
 
 
 let currentUser=null;
