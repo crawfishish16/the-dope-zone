@@ -852,6 +852,18 @@ let dzVal=1,dzOpen=false,selDurVal=60,isWork=false,catFilter='all',dragSrc=null,
 
 
 // ── AUTH FUNCTIONS ────────────────────────────────────────────────────────────
+function waitForFirebase(){
+  return new Promise((resolve,reject)=>{
+    if(window.fbAuth){resolve();return;}
+    let attempts=0;
+    const interval=setInterval(()=>{
+      attempts++;
+      if(window.fbAuth){clearInterval(interval);resolve();}
+      else if(attempts>20){clearInterval(interval);reject(new Error('Firebase not loaded'));}
+    },100);
+  });
+}
+
 function showAuth(id){
   ['v-login','v-signup','v-reset'].forEach(v=>{
     const el=document.getElementById(v);
@@ -868,6 +880,7 @@ async function doLogin(){
   if(!email||!password){err.textContent='Please enter your email and password.';err.className='auth-error show';return;}
   btn.className='auth-btn loading';btn.textContent='Signing in...';
   try{
+    await waitForFirebase();
     const cred=await window.fbAuth.signInWithEmailAndPassword(email,password);
     btn.className='auth-btn';btn.textContent='Sign in';
     currentUser=cred.user;
@@ -907,6 +920,7 @@ async function doSignup(){
   if(password.length<6){err.textContent='Password must be at least 6 characters.';err.className='auth-error show';return;}
   btn.className='auth-btn loading';btn.textContent='Creating account...';
   try{
+    await waitForFirebase();
     await window.fbAuth.createUserWithEmailAndPassword(email,password);
     btn.className='auth-btn';btn.textContent='Create account';
     showAuth('v-login');
