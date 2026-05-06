@@ -12,7 +12,9 @@
 <title>The Dope Zone</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -951,45 +953,48 @@ function renderUserPill(){
   wrap.innerHTML=`<div class="user-pill" onclick="if(confirm('Sign out?'))doSignOut()"><div class="user-avatar">${init}</div><span class="user-email">${em}</span></div>`;
 }
 
-// ── CLOUD STORAGE ─────────────────────────────────────────────────────────────
+// ── FIRESTORE STORAGE ─────────────────────────────────────────────────────────
+function userDoc(){return fbDb.collection('users').doc(currentUser.uid);}
+
 async function loadAll(){
   if(!currentUser)return;
   try{
-    const{data}=await supa.from('user_data').select('*').eq('user_id',currentUser.id).single();
-    if(data){
-      if(data.schedule_state&&Object.keys(data.schedule_state).length){
-        const l=data.schedule_state;
+    const doc=await userDoc().get();
+    if(doc.exists){
+      const d=doc.data();
+      if(d.schedule_state&&Object.keys(d.schedule_state).length){
+        const l=d.schedule_state;
         state={...state,...l,schedules:{free:[],work:[],...(l.schedules||{})},startTimes:{free:360,work:360,...(l.startTimes||{})}};
       }
-      if(data.costs&&Object.keys(data.costs).length)Object.assign(costs,data.costs);
-      if(data.progress)window.piSaved=data.progress;
+      if(d.costs&&Object.keys(d.costs).length)Object.assign(costs,d.costs);
+      if(d.progress)window.piSaved=d.progress;
     }
-  }catch(e){}
+  }catch(e){console.error('loadAll',e);}
 }
 
 async function saveState(){
   if(!currentUser)return;
   try{
     const d=document.getElementById('saveDot');if(d)d.className='save-dot saving';
-    await supa.from('user_data').upsert({user_id:currentUser.id,schedule_state:state,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+    await userDoc().set({schedule_state:state,updated_at:new Date().toISOString()},{merge:true});
     if(d){d.className='save-dot saved';setTimeout(()=>{if(d)d.className='save-dot';},1500);}
-  }catch(e){}
+  }catch(e){console.error('saveState',e);}
 }
 
 async function saveCosts(){
   if(!currentUser)return;
   try{
     const d=document.getElementById('saveDot2');if(d)d.className='save-dot saving';
-    await supa.from('user_data').upsert({user_id:currentUser.id,costs,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+    await userDoc().set({costs,updated_at:new Date().toISOString()},{merge:true});
     if(d){d.className='save-dot saved';setTimeout(()=>{if(d)d.className='save-dot';},1500);}
-  }catch(e){}
+  }catch(e){console.error('saveCosts',e);}
 }
 
 async function saveProgress(){
   if(!currentUser||!window.piSaved)return;
   try{
-    await supa.from('user_data').upsert({user_id:currentUser.id,progress:window.piSaved,updated_at:new Date().toISOString()},{onConflict:'user_id'});
-  }catch(e){}
+    await userDoc().set({progress:window.piSaved,updated_at:new Date().toISOString()},{merge:true});
+  }catch(e){console.error('saveProgress',e);}
 }
 
 function debounceSave(){if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(saveState,600);}
@@ -1459,35 +1464,17 @@ async function init(){
   hideAllViews();hideAllNavs();
   document.getElementById('v-loading').classList.add('on');
 
-  // Check Supabase loaded
-  if(typeof supabase==='undefined'||!supa){
-    console.error('Supabase not loaded');
-    hideAllViews();hideAllNavs();
-    showAuth('v-login');
-    const err=document.getElementById('login-error');
-    if(err){err.textContent='Connection error. Please refresh and try again.';err.className='auth-error show';}
-    return;
-  }
-
-  // Listen for auth state changes
-  supa.auth.onAuthStateChange(async(event,session)=>{
-    if(session&&session.user){
-      currentUser=session.user;
+  // Firebase auth state listener
+  fbAuth.onAuthStateChanged(async(user)=>{
+    if(user){
+      currentUser=user;
       await enterApp();
     } else {
-      // Not logged in — show login screen
       currentUser=null;
       hideAllViews();hideAllNavs();
       showAuth('v-login');
     }
   });
-
-  // Check initial session
-  const{data:{session}}=await supa.auth.getSession();
-  if(!session){
-    hideAllViews();hideAllNavs();
-    showAuth('v-login');
-  }
 }
 
 init();
