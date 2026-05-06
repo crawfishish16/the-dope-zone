@@ -886,18 +886,13 @@ async function doLogin(){
   if(!email||!password){err.textContent='Please enter your email and password.';err.className='auth-error show';return;}
   btn.className='auth-btn loading';btn.textContent='Signing in...';
   try{
-    const cred2=await fbAuth.signInWithEmailAndPassword(email,password);const data={user:cred2.user};const error=null;
+    const cred=await fbAuth.signInWithEmailAndPassword(email,password);
     btn.className='auth-btn';btn.textContent='Sign in';
-    if(error){err.textContent=error.message;err.className='auth-error show';return;}
-    if(data&&data.user){
-      currentUser=data.user;
-      await enterApp();
-    } else {
-      err.textContent='Sign in failed — please try again.';err.className='auth-error show';
-    }
+    currentUser=cred.user;
+    await enterApp();
   }catch(e){
     btn.className='auth-btn';btn.textContent='Sign in';
-    err.textContent='Error: '+e.message;
+    err.textContent=e.message.replace('Firebase: ','');
     err.className='auth-error show';
   }
 }
@@ -929,12 +924,19 @@ async function doSignup(){
   if(!email||!password){err.textContent='Please enter your email and password.';err.className='auth-error show';return;}
   if(password.length<6){err.textContent='Password must be at least 6 characters.';err.className='auth-error show';return;}
   btn.className='auth-btn loading';btn.textContent='Creating account...';
-  await fbAuth.createUserWithEmailAndPassword(email,password);const error=null;
-  btn.className='auth-btn';btn.textContent='Create account';
-  if(error){err.textContent=error.message;err.className='auth-error show';return;}
-  showAuth('v-login');
-  const le=document.getElementById('login-error');
-  le.textContent='Account created! Please sign in.';le.style.background='var(--g4)';le.style.borderColor='var(--g3)';le.style.color='var(--g2)';le.className='auth-error show';
+  try{
+    await fbAuth.createUserWithEmailAndPassword(email,password);
+    btn.className='auth-btn';btn.textContent='Create account';
+    showAuth('v-login');
+    const le=document.getElementById('login-error');
+    le.textContent='Account created! Please sign in.';
+    le.style.background='var(--g4)';le.style.borderColor='var(--g3)';le.style.color='var(--g2)';
+    le.className='auth-error show';
+  }catch(e){
+    btn.className='auth-btn';btn.textContent='Create account';
+    err.textContent=e.message.replace('Firebase: ','').replace(/ \(auth.*\)/,'');
+    err.className='auth-error show';
+  }
 }
 
 async function doReset(){
