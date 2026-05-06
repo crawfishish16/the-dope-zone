@@ -12,7 +12,7 @@
 <title>The Dope Zone</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -869,28 +869,39 @@ async function doLogin(){
   err.className='auth-error';
   if(!email||!password){err.textContent='Please enter your email and password.';err.className='auth-error show';return;}
   btn.className='auth-btn loading';btn.textContent='Signing in...';
-  const{data,error}=await supa.auth.signInWithPassword({email,password});
-  btn.className='auth-btn';btn.textContent='Sign in';
-  if(error){err.textContent='Error: '+error.message+' ('+error.status+')';err.className='auth-error show';return;}
-  if(!data||!data.user){err.textContent='No user returned. Data: '+JSON.stringify(data);err.className='auth-error show';return;}
-  if(data&&data.user){
-    currentUser=data.user;
-    await loadAll();
-    if(state.catalogue.length===0){
-      state.catalogue=JSON.parse(JSON.stringify(DEFAULT_CAT));
-      saveState().catch(()=>{});
+  try{
+    const{data,error}=await supa.auth.signInWithPassword({email,password});
+    btn.className='auth-btn';btn.textContent='Sign in';
+    if(error){err.textContent=error.message;err.className='auth-error show';return;}
+    if(data&&data.user){
+      currentUser=data.user;
+      await enterApp();
+    } else {
+      err.textContent='Sign in failed — please try again.';err.className='auth-error show';
     }
-    buildTimes();
-    updateTrigger();
-    document.getElementById('sf').className='seg'+(state.schedMode==='free'?' on':'');
-    document.getElementById('sw').className='seg'+(state.schedMode==='work'?' on':'');
-    buildCostsForm();
-    updateOverviewCard();
-    renderUserPill();
-    hideAllViews();hideAllNavs();
-    document.getElementById('v-welcome').classList.add('on');
-    setStatusbar(true);
+  }catch(e){
+    btn.className='auth-btn';btn.textContent='Sign in';
+    err.textContent='Error: '+e.message;
+    err.className='auth-error show';
   }
+}
+
+async function enterApp(){
+  await loadAll();
+  if(state.catalogue.length===0){
+    state.catalogue=JSON.parse(JSON.stringify(DEFAULT_CAT));
+    saveState().catch(()=>{});
+  }
+  buildTimes();
+  updateTrigger();
+  document.getElementById('sf').className='seg'+(state.schedMode==='free'?' on':'');
+  document.getElementById('sw').className='seg'+(state.schedMode==='work'?' on':'');
+  buildCostsForm();
+  updateOverviewCard();
+  renderUserPill();
+  hideAllViews();hideAllNavs();
+  document.getElementById('v-welcome').classList.add('on');
+  setStatusbar(true);
 }
 
 async function doSignup(){
@@ -1452,23 +1463,7 @@ async function init(){
   supa.auth.onAuthStateChange(async(event,session)=>{
     if(session&&session.user){
       currentUser=session.user;
-      // Load user data from Supabase
-      await loadAll();
-      if(state.catalogue.length===0){
-        state.catalogue=JSON.parse(JSON.stringify(DEFAULT_CAT));
-        saveState().catch(()=>{});
-      }
-      buildTimes();
-      updateTrigger();
-      document.getElementById('sf').className='seg'+(state.schedMode==='free'?' on':'');
-      document.getElementById('sw').className='seg'+(state.schedMode==='work'?' on':'');
-      buildCostsForm();
-      updateOverviewCard();
-      renderUserPill();
-      // Go to welcome flow
-      hideAllViews();hideAllNavs();
-      document.getElementById('v-welcome').classList.add('on');
-      setStatusbar(true);
+      await enterApp();
     } else {
       // Not logged in — show login screen
       currentUser=null;
